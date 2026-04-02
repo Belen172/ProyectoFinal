@@ -28,8 +28,11 @@ export class UsuariosService {
     return this.usuarioRepository.save(nuevoUsuario);
   }
 
-  findAll() {
-    return `This action returns all usuarios`;
+  async findAll() {
+    return this.usuarioRepository.find({
+      // Selecciono explícitamente los campos que quiero devolver, sin incluir la contraseña
+      select: ['id', 'nombre', 'apellido', 'telefono', 'email', 'rol', 'fecha_registro'],
+    });
   }
 
   findOne(id: number) {
@@ -44,3 +47,4 @@ export class UsuariosService {
     return `This action removes a #${id} usuario`;
   }
 }
+
