@@ -35,16 +35,28 @@ export class UsuariosService {
     });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} usuario`;
+  // BUSCAR POR ID:
+  async findOne(id: number) {
+    return this.usuarioRepository.findOne({
+      where: { id }, // Le digo qué ID buscar
+      // Igual que antes, le oculto la contraseña por seguridad
+      select: ['id', 'nombre', 'apellido', 'telefono', 'email', 'rol', 'fecha_registro'],
+    });
   }
 
-  update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
-    return `This action updates a #${id} usuario`;
+  // ACTUALIZAR (EDITAR):
+  async update(id: number, updateUsuarioDto: any) {
+    await this.usuarioRepository.update(id, updateUsuarioDto);
+    
+    // Devuelvo el usuario ya actualizado para ver cómo quedó
+    return this.findOne(id); 
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} usuario`;
+  // ELIMINAR:
+  async remove(id: number) {
+    // Uso delete() que borra la fila directamente en MySQL
+    await this.usuarioRepository.delete(id);
+    return { mensaje: `Usuario con id ${id} eliminado correctamente` };
   }
 }
 

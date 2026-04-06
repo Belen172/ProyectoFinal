@@ -19,11 +19,12 @@ export class UsuariosController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
+    // El '+' adelante del id lo convierte de texto a número automáticamente
     return this.usuariosService.findOne(+id);
   }
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUsuarioDto: UpdateUsuarioDto) {
+  @Patch(':id') // Patch se usa para actualizar datos parcialmente
+  update(@Param('id') id: string, @Body() updateUsuarioDto: any) {
     return this.usuariosService.update(+id, updateUsuarioDto);
   }
 
