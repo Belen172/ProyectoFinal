@@ -11,28 +11,28 @@ export enum EstadoServicio {
 @Entity('servicios')
 export class Servicio {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @CreateDateColumn() // TypeORM llena la fecha y hora solas al crear el registro
-  fecha_ingreso: Date;
+  fecha_ingreso!: Date;
 
   @Column({ type: 'text' })
-  problema_informado: string;
+  problema_informado!: string;
 
   @Column({ type: 'enum', enum: EstadoServicio, default: EstadoServicio.PENDIENTE })
-  estado: EstadoServicio;
+  estado!: EstadoServicio;
 
   @Column({ type: 'text', nullable: true })
-  trabajo_realizado: string;
+  trabajo_realizado!: string;
 
   @Column({ type: 'datetime', nullable: true })
-  fecha_entrega: Date;
+  fecha_entrega!: Date;
 
   @Column({ type: 'date', nullable: true })
-  proximo_service_estimado: Date;
+  proximo_service_estimado!: Date;
 
   // Relación: Muchos servicios se le hacen a una Bicicleta
   @ManyToOne(() => Bicicleta)
   @JoinColumn({ name: 'bicicleta_id' })
-  bicicleta: Bicicleta;
+  bicicleta!: Bicicleta;
 }

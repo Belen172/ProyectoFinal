@@ -3,24 +3,26 @@ import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-vali
 export class CreateUsuarioDto {
   @IsString()
   @IsNotEmpty({ message: 'El nombre es obligatorio' })
-  nombre: string;
+  nombre!: string;
 
   @IsString()
   @IsNotEmpty({ message: 'El apellido es obligatorio' })
-  apellido: string;
+  apellido!: string;
 
   @IsString()
   @IsOptional() // El teléfono es opcional
-  telefono: string;
+  telefono?: string;
 
   @IsEmail({}, { message: 'El formato del email no es válido' })
-  email: string;
+  @IsNotEmpty({ message: 'El email es obligatorio' })
+  email!: string;
 
   @IsString()
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
-  password: string;
+  @IsNotEmpty({ message: 'La contraseña es obligatoria' })
+  password!: string;
 
   @IsString()
   @IsOptional()
-  rol: string;
+  rol?: string;
 }

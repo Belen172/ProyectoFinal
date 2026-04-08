@@ -4,6 +4,7 @@ import { UpdateUsuarioDto } from './dto/update-usuario.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Usuario } from './entities/usuario.entity';
+import { NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt'; // Importamos bcrypt para encriptar las contraseñas de los usuarios
 
 @Injectable()
@@ -45,11 +46,17 @@ export class UsuariosService {
   }
 
   // ACTUALIZAR (EDITAR):
-  async update(id: number, updateUsuarioDto: any) {
-    await this.usuarioRepository.update(id, updateUsuarioDto);
-    
+  async update(id: number, updateUsuarioDto: UpdateUsuarioDto) {
+    const usuario = await this.usuarioRepository.findOneBy({ id });
+
+    if (!usuario) {
+      throw new NotFoundException('Usuario no encontrado');
+    }
+
+    Object.assign(usuario, updateUsuarioDto);
+   
     // Devuelvo el usuario ya actualizado para ver cómo quedó
-    return this.findOne(id); 
+    return await this.usuarioRepository.save(usuario);
   }
 
   // ELIMINAR:

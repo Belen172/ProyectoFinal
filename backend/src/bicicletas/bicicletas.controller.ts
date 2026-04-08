@@ -17,6 +17,11 @@ export class BicicletasController {
     return this.bicicletasService.findAll();
   }
 
+  @Get('usuario/:idUsuario')
+  findByUsuario(@Param('idUsuario') idUsuario: string) {
+    return this.bicicletasService.findByUsuario(+idUsuario);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.bicicletasService.findOne(+id);

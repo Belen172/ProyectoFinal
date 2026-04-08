@@ -9,26 +9,26 @@ export enum RolUsuario {
 @Entity('usuarios') // Así se va a llamar la tabla en MySQL
 export class Usuario {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column({ type: 'varchar', length: 50 })
-  nombre: string;
+  nombre!: string;
 
   @Column({ type: 'varchar', length: 50 })
-  apellido: string;
+  apellido!: string;
 
   @Column({ type: 'varchar', length: 20, nullable: true })
-  telefono: string;
+  telefono!: string;
 
   @Column({ type: 'varchar', length: 100, unique: true })
-  email: string;
+  email!: string;
 
   @Column({ type: 'varchar', length: 255 })
-  password: string;
+  password!: string;
 
   @Column({ type: 'enum', enum: RolUsuario, default: RolUsuario.CLIENTE })
-  rol: RolUsuario;
+  rol!: RolUsuario;
 
   @CreateDateColumn()
-  fecha_registro: Date;
+  fecha_registro!: Date;
 }
