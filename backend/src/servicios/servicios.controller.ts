@@ -12,14 +12,20 @@ export class ServiciosController {
     return this.serviciosService.create(createServicioDto);
   }
 
-  @Get()
-  findAll() {
-    return this.serviciosService.findAll();
+  
+  @Get('bicicleta/:bicicletaId')
+  findByBicicleta(@Param('bicicletaId') bicicletaId: string) {
+    return this.serviciosService.findByBicicleta(+bicicletaId);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.serviciosService.findOne(+id);
+  }
+
+  @Get()
+  findAll() {
+    return this.serviciosService.findAll();
   }
 
   @Patch(':id')

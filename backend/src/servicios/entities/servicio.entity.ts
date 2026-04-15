@@ -22,6 +22,9 @@ export class Servicio {
   @Column({ type: 'enum', enum: EstadoServicio, default: EstadoServicio.PENDIENTE })
   estado!: EstadoServicio;
 
+  @Column({ type: 'decimal', precision: 10, scale: 2, nullable: true })
+  precio!: number;
+
   @Column({ type: 'text', nullable: true })
   trabajo_realizado!: string;
 
