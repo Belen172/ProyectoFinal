@@ -6,15 +6,43 @@ import PanelCliente from './pages/PanelCliente';
 function App() {
   return (
     <BrowserRouter>
-      {/* Menú de navegación temporal para probar que las rutas cambian */}
-      <nav style={{ padding: '15px', backgroundColor: '#f0f0f0', marginBottom: '20px' }}>
-        <Link to="/" style={{ marginRight: '15px', fontWeight: 'bold' }}>Login</Link>
-        <Link to="/admin" style={{ marginRight: '15px', fontWeight: 'bold' }}>Dueño</Link>
-        <Link to="/cliente" style={{ fontWeight: 'bold' }}>Cliente</Link>
+      {/* Navbar de Bootstrap oscuro */}
+      <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div className="container">
+          <Link className="navbar-brand" to="/">
+            Taller de Bicicletas
+          </Link>
+          
+          <button 
+            className="navbar-toggler" 
+            type="button" 
+            data-bs-toggle="collapse" 
+            data-bs-target="#navbarNav" 
+            aria-controls="navbarNav" 
+            aria-expanded="false" 
+            aria-label="Toggle navigation"
+          >
+            <span className="navbar-toggler-icon"></span>
+          </button>
+
+          <div className="collapse navbar-collapse" id="navbarNav">
+            <ul className="navbar-nav ms-auto">
+              <li className="nav-item">
+                <Link className="nav-link" to="/">Inicio</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/admin">Dueño</Link>
+              </li>
+              <li className="nav-item">
+                <Link className="nav-link" to="/cliente">Cliente</Link>
+              </li>
+            </ul>
+          </div>
+        </div>
       </nav>
 
-      <div style={{ padding: '20px' }}>
-        {/* Acá adentro se van a renderizar las páginas según la URL */}
+      {/* Contenedor principal con margen superior */}
+      <div className="container mt-4">
         <Routes>
           <Route path="/" element={<Login />} />
           <Route path="/admin" element={<PanelDueno />} />
