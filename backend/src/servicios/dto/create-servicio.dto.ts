@@ -12,7 +12,7 @@ import { EstadoServicio } from '../entities/servicio.entity';
 export class CreateServicioDto {
   @IsString()
   @IsNotEmpty()
-  problema_informado: string;
+  problema_informado!: string;
 
   @IsEnum(EstadoServicio)
   @IsOptional()
@@ -20,7 +20,7 @@ export class CreateServicioDto {
 
   @IsNumber({}, { message: 'El precio debe ser un número válido' })
   @IsOptional()
-  precio: number;
+  precio!: number;
 
   @IsString()
   @IsOptional()
@@ -36,5 +36,5 @@ export class CreateServicioDto {
 
   @IsInt({ message: 'El ID de la bicicleta debe ser un número entero' })
   @IsNotEmpty({ message: 'El ID de la bicicleta es obligatorio' })
-  bicicletaId: number;
+  bicicletaId!: number;
 }
