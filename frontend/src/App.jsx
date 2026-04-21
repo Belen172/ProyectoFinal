@@ -10,7 +10,7 @@ function App() {
       <nav className="navbar navbar-expand-lg navbar-dark bg-dark">
         <div className="container">
           <Link className="navbar-brand" to="/">
-            Taller de Bicicletas
+            Proyecto Bike
           </Link>
           
           <button 
