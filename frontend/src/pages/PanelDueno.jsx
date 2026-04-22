@@ -4,15 +4,40 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
 
+const ESTADOS_SERVICIO = [
+  'INGRESADO',
+  'PENDIENTE',
+  'EN_REPARACION',
+  'TERMINADO',
+  'ENTREGADO',
+];
+
+function textoDueño(usuario, sinAsignar) {
+  if (!usuario) return sinAsignar;
+  const nombreCompleto = [usuario.nombre, usuario.apellido].filter(Boolean).join(' ').trim();
+  if (nombreCompleto) {
+    return `${nombreCompleto} (ID: ${usuario.id})`;
+  }
+  return `ID: ${usuario.id}`;
+}
+
 export default function PanelDueno() {
   const [modalAbierto, setModalAbierto] = useState(false);
   const [nuevaMarca, setNuevaMarca] = useState('');
   const [nuevoModelo, setNuevoModelo] = useState('');
   const [nuevoTipo, setNuevoTipo] = useState('');
+  const [nuevaObservacion, setNuevaObservacion] = useState('');
   const [nuevoUsuarioId, setNuevoUsuarioId] = useState('');
   const [bicicletas, setBicicletas] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [biciSeleccionada, setBiciSeleccionada] = useState(null); // null significa que no hay ninguna seleccionada al principio
+  const [serviciosBici, setServiciosBici] = useState([]);
+  const [cargandoServicios, setCargandoServicios] = useState(false);
+  const [mostrandoFormServicio, setMostrandoFormServicio] = useState(false);
+  const [nuevoProblema, setNuevoProblema] = useState('');
+  const [nuevoPrecio, setNuevoPrecio] = useState('');
+  const [usuariosDisponibles, setUsuariosDisponibles] = useState([]);
+  const [cargandoUsuariosModal, setCargandoUsuariosModal] = useState(false);
 
   // Simula la llamada a la API para obtener bicicletas
   async function traerBicicletas() {
@@ -32,6 +57,66 @@ export default function PanelDueno() {
     // eslint-disable-next-line
   }, []);
 
+  useEffect(() => {
+    async function traerServiciosDeBici() {
+      // 1. Si no hay bici, limpiamos y cortamos acá
+      if (!biciSeleccionada) {
+        setServiciosBici([]);
+        setCargandoServicios(false);
+        return;
+      }
+
+      setCargandoServicios(true);
+      try {
+        // 2. Pedimos TODOS los servicios al backend
+        const res = await api.get('/servicios');
+        const todosServicios = Array.isArray(res.data) ? res.data : [];
+        
+        // 3. Filtramos a mano acá en React
+        const serviciosFiltrados = todosServicios.filter(
+          (servicio) => servicio.bicicleta && servicio.bicicleta.id === biciSeleccionada.id
+        );
+
+        // 4. Guardamos solo los que pasaron el filtro
+        setServiciosBici(serviciosFiltrados);
+        
+      } catch (error) {
+        console.error("Error al traer servicios:", error);
+        setServiciosBici([]);
+      } finally {
+        setCargandoServicios(false);
+      }
+    }
+
+    traerServiciosDeBici();
+  }, [biciSeleccionada]);
+
+  useEffect(() => {
+    if (!modalAbierto) return;
+    let cancelado = false;
+    async function cargarUsuariosParaDueño() {
+      setCargandoUsuariosModal(true);
+      try {
+        const res = await api.get('/usuarios');
+        if (!cancelado) {
+          setUsuariosDisponibles(Array.isArray(res.data) ? res.data : []);
+        }
+      } catch (error) {
+        console.error(error);
+        if (!cancelado) {
+          setUsuariosDisponibles([]);
+          alert('No se pudo cargar la lista de dueños');
+        }
+      } finally {
+        if (!cancelado) setCargandoUsuariosModal(false);
+      }
+    }
+    cargarUsuariosParaDueño();
+    return () => {
+      cancelado = true;
+    };
+  }, [modalAbierto]);
+
   // Manejar apertura/cierre del modal
   const abrirModal = () => setModalAbierto(true);
   const cerrarModal = () => {
@@ -39,6 +124,7 @@ export default function PanelDueno() {
     setNuevaMarca('');
     setNuevoModelo('');
     setNuevoTipo('');
+    setNuevaObservacion('');
     setNuevoUsuarioId('');
   };
 
@@ -50,6 +136,7 @@ export default function PanelDueno() {
         marca: nuevaMarca,
         modelo: nuevoModelo,
         tipo: nuevoTipo,
+        observaciones: nuevaObservacion,
         usuarioId: Number(nuevoUsuarioId)
       });
       cerrarModal();
@@ -76,6 +163,64 @@ export default function PanelDueno() {
         alert('Hubo un error al eliminar la bicicleta');
         console.error(error);
       }
+    }
+  };
+
+  const cerrarModalDetalles = () => {
+    setBiciSeleccionada(null);
+    setMostrandoFormServicio(false);
+    setNuevoProblema('');
+    setNuevoPrecio('');
+  };
+
+  const cancelarFormServicio = () => {
+    setMostrandoFormServicio(false);
+    setNuevoProblema('');
+    setNuevoPrecio('');
+  };
+
+  const manejarCrearServicio = async (e) => {
+    e.preventDefault();
+    if (!biciSeleccionada) return;
+    try {
+      await api.post('/servicios', {
+        problema_informado: nuevoProblema,
+        precio: Number(nuevoPrecio),
+        bicicletaId: biciSeleccionada.id,
+        estado: 'INGRESADO',
+      });
+      setMostrandoFormServicio(false);
+      setNuevoProblema('');
+      setNuevoPrecio('');
+      setCargandoServicios(true);
+      try {
+        const res = await api.get('/servicios');
+        const todosServicios = Array.isArray(res.data) ? res.data : [];
+        const serviciosFiltrados = todosServicios.filter(
+          (servicio) => servicio.bicicleta && servicio.bicicleta.id === biciSeleccionada.id
+        );
+        setServiciosBici(serviciosFiltrados);
+      } catch (error) {
+        console.error(error);
+        setServiciosBici([]);
+      } finally {
+        setCargandoServicios(false);
+      }
+    } catch (error) {
+      alert('Error al crear el servicio');
+      console.error(error);
+    }
+  };
+
+  const manejarCambioEstado = async (servicioId, nuevoEstado) => {
+    try {
+      await api.patch(`/servicios/${servicioId}`, { estado: nuevoEstado });
+      setServiciosBici((prev) =>
+        prev.map((s) => (s.id === servicioId ? { ...s, estado: nuevoEstado } : s))
+      );
+    } catch (error) {
+      alert('No se pudo actualizar el estado del servicio');
+      console.error(error);
     }
   };
 
@@ -128,21 +273,54 @@ export default function PanelDueno() {
                     />
                   </div>
                   <div className="mb-3">
-                    <label className="form-label">ID del Usuario Dueño</label>
-                    <input
-                      type="number"
+                    <label className="form-label">Observaciones Generales</label>
+                    <textarea
                       className="form-control"
-                      value={nuevoUsuarioId}
-                      onChange={e => setNuevoUsuarioId(e.target.value)}
-                      required
+                      rows={2}
+                      value={nuevaObservacion}
+                      onChange={(e) => setNuevaObservacion(e.target.value)}
                     />
+                  </div>
+                  <div className="mb-3">
+                    <label className="form-label">Dueño de la bicicleta</label>
+                    {cargandoUsuariosModal ? (
+                      <div className="text-center py-2">
+                        <div className="spinner-border spinner-border-sm text-secondary" role="status">
+                          <span className="visually-hidden">Cargando dueños...</span>
+                        </div>
+                      </div>
+                    ) : usuariosDisponibles.length === 0 ? (
+                      <p className="form-text text-danger mb-0">
+                        No hay usuarios registrados. Creá un usuario antes de asignar una bicicleta.
+                      </p>
+                    ) : (
+                      <select
+                        className="form-select"
+                        value={nuevoUsuarioId}
+                        onChange={(e) => setNuevoUsuarioId(e.target.value)}
+                        required
+                      >
+                        <option value="" disabled>
+                          Seleccioná el dueño…
+                        </option>
+                        {usuariosDisponibles.map((u) => (
+                          <option key={u.id} value={String(u.id)}>
+                            {textoDueño(u, '')}
+                          </option>
+                        ))}
+                      </select>
+                    )}
                   </div>
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={cerrarModal}>
                     Cancelar
                   </button>
-                  <button type="submit" className="btn btn-success">
+                  <button
+                    type="submit"
+                    className="btn btn-success"
+                    disabled={cargandoUsuariosModal || usuariosDisponibles.length === 0}
+                  >
                     Crear Bicicleta
                   </button>
                 </div>
@@ -159,7 +337,7 @@ export default function PanelDueno() {
             <div className="modal-content">
               <div className="modal-header bg-primary text-white">
                 <h5 className="modal-title">Ficha Técnica - Bici #{biciSeleccionada.id}</h5>
-                <button type="button" className="btn-close btn-close-white" onClick={() => setBiciSeleccionada(null)}></button>
+                <button type="button" className="btn-close btn-close-white" onClick={cerrarModalDetalles}></button>
               </div>
               
               <div className="modal-body">
@@ -168,24 +346,110 @@ export default function PanelDueno() {
                   <p className="mb-1"><strong>Marca:</strong> {biciSeleccionada.marca}</p>
                   <p className="mb-1"><strong>Modelo:</strong> {biciSeleccionada.modelo}</p>
                   <p className="mb-1"><strong>Tipo:</strong> {biciSeleccionada.tipo}</p>
-                  <p className="mb-1"><strong>Dueño (ID):</strong> {biciSeleccionada.usuario ? biciSeleccionada.usuario.id : 'No registrado'}</p>
+                  <p className="mb-1"><strong>Dueño:</strong> {textoDueño(biciSeleccionada.usuario, 'No registrado')}</p>
                 </div>
                 
                 <hr />
                 
                 <div>
-                  <h6 className="text-muted mb-2">Historial de Servicios</h6>
-                  {/* Acá armamos el esqueleto para cuando conectemos el módulo de servicios */}
-                  <div className="alert alert-light border text-center p-3">
-                    <small className="text-muted">
-                      Próximamente conectaremos esto con las órdenes de reparación de esta bicicleta. 🛠️
-                    </small>
+                  <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+                    <h6 className="text-muted mb-0">Historial de Servicios</h6>
+                    {!mostrandoFormServicio && (
+                      <button
+                        type="button"
+                        className="btn btn-sm btn-outline-primary"
+                        onClick={() => setMostrandoFormServicio(true)}
+                      >
+                        + Cargar Servicio
+                      </button>
+                    )}
                   </div>
+                  {cargandoServicios && !mostrandoFormServicio ? (
+                    <div className="text-center py-3">
+                      <div className="spinner-border spinner-border-sm text-primary" role="status">
+                        <span className="visually-hidden">Cargando servicios...</span>
+                      </div>
+                    </div>
+                  ) : mostrandoFormServicio ? (
+                    <form onSubmit={manejarCrearServicio} className="border rounded p-3 bg-light">
+                      <div className="mb-3">
+                        <label className="form-label">Problema Informado</label>
+                        <textarea
+                          className="form-control"
+                          rows={3}
+                          value={nuevoProblema}
+                          onChange={(e) => setNuevoProblema(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Precio</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          min="0"
+                          step="0.01"
+                          value={nuevoPrecio}
+                          onChange={(e) => setNuevoPrecio(e.target.value)}
+                          required
+                        />
+                      </div>
+                      <div className="d-flex justify-content-end gap-2">
+                        <button type="button" className="btn btn-secondary btn-sm" onClick={cancelarFormServicio}>
+                          Cancelar
+                        </button>
+                        <button type="submit" className="btn btn-success btn-sm">
+                          Guardar
+                        </button>
+                      </div>
+                    </form>
+                  ) : serviciosBici.length === 0 ? (
+                    <div className="alert alert-light border text-center p-3 mb-0">
+                      <small className="text-muted">No hay historial de servicios para esta bicicleta.</small>
+                    </div>
+                  ) : (
+                    <div className="table-responsive">
+                      <table className="table table-sm table-striped align-middle mb-0">
+                        <thead>
+                          <tr>
+                            <th>Fecha ingreso</th>
+                            <th>Problema</th>
+                            <th>Estado</th>
+                            <th>Precio</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {serviciosBici.map((servicio) => (
+                            <tr key={servicio.id}>
+                              <td>{new Date(servicio.fecha_ingreso).toLocaleDateString() || '-'}</td>
+                              <td>{servicio.problema_informado || '-'}</td>
+                              <td style={{ minWidth: '11rem' }}>
+                                <select
+                                  className="form-select form-select-sm"
+                                  value={servicio.estado}
+                                  onChange={(e) =>
+                                    manejarCambioEstado(servicio.id, e.target.value)
+                                  }
+                                >
+                                  {ESTADOS_SERVICIO.map((estado) => (
+                                    <option key={estado} value={estado}>
+                                      {estado}
+                                    </option>
+                                  ))}
+                                </select>
+                              </td>
+                              <td>{servicio.precio ?? '-'}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
                 </div>
               </div>
               
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" onClick={() => setBiciSeleccionada(null)}>
+                <button type="button" className="btn btn-secondary" onClick={cerrarModalDetalles}>
                   Cerrar
                 </button>
               </div>
@@ -214,7 +478,7 @@ export default function PanelDueno() {
                     <th>ID</th>
                     <th>Marca</th>
                     <th>Modelo</th>
-                    <th>Dueño (ID)</th>
+                    <th>Dueño</th>
                     <th>Acciones</th>
                   </tr>
                 </thead>
@@ -224,7 +488,7 @@ export default function PanelDueno() {
                       <td>#{bici.id}</td>
                       <td><strong>{bici.marca}</strong></td>
                       <td>{bici.modelo}</td>
-                      <td>{bici.usuario ? bici.usuario.id : 'Sin asignar'}</td>
+                      <td>{textoDueño(bici.usuario, 'Sin asignar')}</td>
                       <td>
                         <button 
                           className="btn btn-sm btn-outline-primary me-2"
