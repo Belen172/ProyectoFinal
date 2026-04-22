@@ -31,6 +31,7 @@ export class ServiciosService {
         fecha_ingreso: true,
         problema_informado: true,
         estado: true,
+        precio: true,
         trabajo_realizado: true,
         fecha_entrega: true,
         proximo_service_estimado: true,

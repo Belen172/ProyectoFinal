@@ -2,6 +2,7 @@ import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, Jo
 import { Bicicleta } from '../../bicicletas/entities/bicicleta.entity';
 
 export enum EstadoServicio {
+  INGRESADO = 'INGRESADO',
   PENDIENTE = 'PENDIENTE',
   EN_REPARACION = 'EN_REPARACION',
   TERMINADO = 'TERMINADO',
