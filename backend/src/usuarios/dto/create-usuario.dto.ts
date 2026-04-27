@@ -10,6 +10,10 @@ export class CreateUsuarioDto {
   apellido!: string;
 
   @IsString()
+  @IsOptional()
+  dni?: string;
+
+  @IsString()
   @IsOptional() // El teléfono es opcional
   telefono?: string;
 

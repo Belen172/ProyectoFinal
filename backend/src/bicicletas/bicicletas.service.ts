@@ -43,6 +43,7 @@ export class BicicletasService {
           id: true,
           nombre: true,
           apellido: true,
+          dni: true,
           telefono: true,
           email: true,
         }
