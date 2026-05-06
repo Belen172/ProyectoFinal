@@ -14,6 +14,10 @@ export class CreateBicicletaDto {
   tipo!: string;
 
   @IsString()
+  @IsOptional()
+  color?: string; // El signo de pregunta indica que puede estar vacío
+
+  @IsString()
   @IsOptional() // Es opcional
   observaciones?: string;
 

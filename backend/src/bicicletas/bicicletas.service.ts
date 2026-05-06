@@ -30,7 +30,7 @@ export class BicicletasService {
   async findAll() {
     return this.bicicletaRepository.find({
       // 1. Le decimos que traiga la relación (el nombre 'usuario' sale de tu entidad)
-      relations: ['usuario'], 
+      relations: ['usuario', 'servicios'], 
       
       // 2. Elegimos qué datos devolver para mantener todo seguro y limpio
       select: {
@@ -38,6 +38,7 @@ export class BicicletasService {
         marca: true,
         modelo: true,
         tipo: true,
+        color: true,
         observaciones: true,
         usuario: { // Del usuario, solo traemos estos datos:
           id: true,
@@ -46,6 +47,12 @@ export class BicicletasService {
           dni: true,
           telefono: true,
           email: true,
+        },
+        servicios: {
+          id: true,
+          estado: true,
+          trabajo_realizado: true,
+          fecha_entrega: true
         }
       }
     });

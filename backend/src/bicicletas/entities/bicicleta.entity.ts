@@ -1,5 +1,6 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Usuario } from '../../usuarios/entities/usuario.entity'; 
+import { Servicio } from '../../servicios/entities/servicio.entity';
 
 @Entity('bicicletas')
 export class Bicicleta {
@@ -15,6 +16,9 @@ export class Bicicleta {
   @Column({ type: 'varchar', length: 50 })
   tipo!: string;
 
+  @Column({ type: 'varchar', length: 30, nullable: true })
+  color!: string;
+
   @Column({ type: 'text', nullable: true })
   observaciones!: string;
 
@@ -22,4 +26,8 @@ export class Bicicleta {
   @ManyToOne(() => Usuario) 
   @JoinColumn({ name: 'usuario_id' })
   usuario!: Usuario;
+
+  // Relación: Muchas bicicletas pueden tener muchos servicios
+  @OneToMany(() => Servicio, (servicio) => servicio.bicicleta)
+  servicios!: Servicio[];
 }
