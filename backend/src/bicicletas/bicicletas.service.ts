@@ -50,7 +50,9 @@ export class BicicletasService {
         },
         servicios: {
           id: true,
+          fecha_ingreso: true,
           estado: true,
+          problema_informado: true,
           trabajo_realizado: true,
           fecha_entrega: true
         }
@@ -88,9 +90,17 @@ export class BicicletasService {
       where: { 
         usuario: { id: usuarioId } // Acá filtramos por el ID del dueño
       },
-      relations: ['usuario'],
+      relations: ['usuario', 'servicios'],
       select: {
         id: true, marca: true, modelo: true, tipo: true, observaciones: true,
+        servicios: {
+          id: true,
+          fecha_ingreso: true,
+          estado: true,
+          problema_informado: true,
+          trabajo_realizado: true,
+          fecha_entrega: true
+        }
       }
     });
   }

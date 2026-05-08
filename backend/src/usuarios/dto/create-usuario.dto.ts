@@ -1,4 +1,4 @@
-import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsOptional, IsString, MinLength, Length } from 'class-validator';
 
 export class CreateUsuarioDto {
   @IsString()
@@ -12,6 +12,11 @@ export class CreateUsuarioDto {
   @IsString()
   @IsOptional()
   dni?: string;
+
+  @IsString()
+  @IsOptional()
+  @Length(11, 11, { message: 'El CUIT debe tener 11 dígitos' })
+  cuit?: string;
 
   @IsString()
   @IsOptional() // El teléfono es opcional

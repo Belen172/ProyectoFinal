@@ -31,8 +31,22 @@ export class UsuariosService {
 
   async findAll() {
     return this.usuarioRepository.find({
-      // Selecciono explícitamente los campos que quiero devolver, sin incluir la contraseña
-      select: ['id', 'nombre', 'apellido', 'telefono', 'email', 'rol', 'fecha_registro'],
+      // 1. Le pido a TypeORM que traiga las bicis de cada cliente
+      relations: ['bicicletas'], 
+      
+      // 2. Seleccionamos los campos
+      select: {
+        id: true,
+        nombre: true,
+        apellido: true,
+        dni: true,  
+        cuit: true,  
+        telefono: true,
+        email: true,
+        rol: true,
+        fecha_registro: true,
+        // No está 'bicicletas' en el select porque ya lo pido en relations
+      }
     });
   }
 

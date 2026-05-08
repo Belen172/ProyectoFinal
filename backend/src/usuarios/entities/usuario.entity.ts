@@ -20,6 +20,9 @@ export class Usuario {
   @Column({ type: 'varchar', length: 20, nullable: true, unique: true })
   dni!: string;
 
+  @Column({ type: 'varchar', length: 11, nullable: true })
+  cuit!: string;
+
   @Column({ type: 'varchar', length: 20, nullable: true })
   telefono!: string;
 
