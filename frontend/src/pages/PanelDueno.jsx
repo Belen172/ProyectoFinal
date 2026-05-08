@@ -1,6 +1,3 @@
-// React y useState, useEffect probablemente ya están importados arriba.
-// IMPORTANTE: Asegúrate de que tienes `import api from '../api';` al inicio del archivo, si no, ponlo tú arriba.
-
 import { useState, useEffect } from 'react';
 import api from '../api';
 
@@ -45,6 +42,7 @@ export default function PanelDueno() {
   const [mostrandoFormCliente, setMostrandoFormCliente] = useState(false);
   const [nuevoCliNombre, setNuevoCliNombre] = useState('');
   const [nuevoCliApellido, setNuevoCliApellido] = useState('');
+  const [nuevoCliCuit, setNuevoCliCuit] = useState('');
   const [nuevoCliDni, setNuevoCliDni] = useState('');
   const [nuevoCliTelefono, setNuevoCliTelefono] = useState('');
   const [nuevoCliEmail, setNuevoCliEmail] = useState('');
@@ -219,6 +217,7 @@ export default function PanelDueno() {
     setMostrandoFormCliente(false);
     setNuevoCliNombre('');
     setNuevoCliApellido('');
+    setNuevoCliCuit('');
     setNuevoCliDni('');
     setNuevoCliTelefono('');
     setNuevoCliEmail('');
@@ -278,6 +277,7 @@ export default function PanelDueno() {
 
       setNuevoCliNombre('');
       setNuevoCliApellido('');
+      setNuevoCliCuit('');
       setNuevoCliDni('');
       setNuevoCliTelefono('');
       setNuevoCliEmail('');
@@ -293,6 +293,16 @@ export default function PanelDueno() {
       setErrorCrearCliente(mensajeFinal);
     } finally {
       setGuardandoCliente(false);
+    }
+  };
+
+  const manejarCambioCuitCliente = (valorCuit) => {
+    setNuevoCliCuit(valorCuit);
+
+    const cuitLimpio = valorCuit.replace(/[^\d]/g, '');
+    if (cuitLimpio.length === 11) {
+      const dniDesdeCuit = cuitLimpio.slice(2, 10);
+      setNuevoCliDni(dniDesdeCuit);
     }
   };
 
@@ -596,6 +606,15 @@ export default function PanelDueno() {
                                 <input
                                   type="text"
                                   className="form-control form-control-sm"
+                                  placeholder="CUIT/CUIL"
+                                  value={nuevoCliCuit}
+                                  onChange={(e) => manejarCambioCuitCliente(e.target.value)}
+                                />
+                              </div>
+                              <div className="col-12 col-md-4">
+                                <input
+                                  type="text"
+                                  className="form-control form-control-sm"
                                   placeholder="DNI"
                                   value={nuevoCliDni}
                                   onChange={(e) => setNuevoCliDni(e.target.value)}
@@ -628,6 +647,7 @@ export default function PanelDueno() {
                                   setMostrandoFormCliente(false);
                                   setNuevoCliNombre('');
                                   setNuevoCliApellido('');
+                                  setNuevoCliCuit('');
                                   setNuevoCliDni('');
                                   setNuevoCliTelefono('');
                                   setNuevoCliEmail('');
