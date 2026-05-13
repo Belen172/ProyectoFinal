@@ -19,6 +19,9 @@ function textoDueño(usuario, sinAsignar) {
 }
 
 export default function PanelDueno() {
+  // NUEVO: Estado para vista activa del tab
+  const [vistaActiva, setVistaActiva] = useState('bicicletas'); // 'bicicletas' | 'clientes'
+
   const [modalAbierto, setModalAbierto] = useState(false);
   const [modalEditarAbierto, setModalEditarAbierto] = useState(false);
   const [biciEditando, setBiciEditando] = useState(null);
@@ -30,7 +33,7 @@ export default function PanelDueno() {
   const [nuevoUsuarioId, setNuevoUsuarioId] = useState('');
   const [bicicletas, setBicicletas] = useState([]);
   const [cargando, setCargando] = useState(true);
-  const [biciSeleccionada, setBiciSeleccionada] = useState(null); // null significa que no hay ninguna seleccionada al principio
+  const [biciSeleccionada, setBiciSeleccionada] = useState(null);
   const [serviciosBici, setServiciosBici] = useState([]);
   const [cargandoServicios, setCargandoServicios] = useState(false);
   const [mostrandoFormServicio, setMostrandoFormServicio] = useState(false);
@@ -51,81 +54,70 @@ export default function PanelDueno() {
   const [errorEditarBici, setErrorEditarBici] = useState('');
   const [busquedaBici, setBusquedaBici] = useState('');
 
-  /* const busquedaClienteNormalizada = busquedaCliente.trim().toLowerCase();
-  const usuariosFiltrados = usuariosDisponibles.filter((u) => {
-    if (!busquedaClienteNormalizada) return true;
-    const textoBusqueda = `${u?.nombre ?? ''} ${u?.apellido ?? ''} ${u?.dni ?? ''}`.toLowerCase();
-    return textoBusqueda.includes(busquedaClienteNormalizada);
-  }); */
+  // NUEVO: Estados y cargadores propios para la vista Clientes (traemos TODOS, con sus bicicletas)
+  const [clientes, setClientes] = useState([]);
+  const [cargandoClientes, setCargandoClientes] = useState(false);
 
+  // Utilidad para limpiar texto (acentos, mayúsculas...)
+  const limpiarTexto = (texto) =>
+    String(texto || '')
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '');
+
+  // Clientes filtrados según búsqueda. Solo filtra por nombre, apellido o dni/cuit
+  const clientesFiltrados = clientes.filter((cli) => {
+    if (!busquedaCliente) return true;
+    const busq = limpiarTexto(busquedaCliente.trim());
+    const datos =
+      limpiarTexto(
+        `${cli.nombre || ''} ${cli.apellido || ''} ${cli.dni || ''} ${cli.cuit || ''}` // incluimos cuit/dni ambos campos
+      );
+    return datos.includes(busq);
+  });
+
+  // El filtrado de usuariosDisponibles SOLO se usa en el modal de asignar dueño/nuevo cliente
   const usuariosFiltrados = usuariosDisponibles.filter((u) => {
     if (!busquedaCliente) return true;
-
-    // Mini-función que saca mayúsculas y tildes (ej: "José" -> "jose")
-    const limpiarTexto = (texto) => {
-      return texto
+    const limpiar = (texto) =>
+      String(texto || '')
         .toLowerCase()
         .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, ""); // Esto borra los acentos invisibles
-    };
-
-    // Limpiamos lo que escribió el usuario en el buscador
-    const busqueda = limpiarTexto(busquedaCliente.trim());
-
-    // Juntamos y limpiamos los datos del cliente de la base de datos
-    const datosCliente = limpiarTexto(`${u.nombre || ''} ${u.apellido || ''} ${u.dni || ''}`);
-
+        .replace(/[\u0300-\u036f]/g, "");
+    const busqueda = limpiar(busquedaCliente.trim());
+    const datosCliente = limpiar(`${u.nombre || ''} ${u.apellido || ''} ${u.dni || ''}`);
     return datosCliente.includes(busqueda);
   });
 
   const bicicletasFiltradas = (() => {
-    const limpiarTexto = (texto) =>
+    const limpiar = (texto) =>
       String(texto || '')
         .toLowerCase()
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '');
-
-    const busquedaLimpia = limpiarTexto(busquedaBici.trim());
-
+    const busquedaLimpia = limpiar(busquedaBici.trim());
     const obtenerUltimaActividad = (bici) => {
       const servicios = Array.isArray(bici?.servicios) ? bici.servicios : [];
-      if (servicios.length === 0) {
-        return -Number(bici?.id || 0);
-      }
-
+      if (servicios.length === 0) return -Number(bici?.id || 0);
       const maxIdServicio = servicios.reduce((maxId, servicio) => {
         const idNumerico = Number(servicio?.id);
         return Number.isFinite(idNumerico) ? Math.max(maxId, idNumerico) : maxId;
-      }, Number.NEGATIVE_INFINITY);
-
-      if (maxIdServicio !== Number.NEGATIVE_INFINITY) {
-        return maxIdServicio;
-      }
-
-      const maxFechaServicio = servicios.reduce((maxFecha, servicio) => {
-        const fechaMs = new Date(servicio?.fecha_ingreso || servicio?.createdAt || 0).getTime();
-        return Number.isFinite(fechaMs) ? Math.max(maxFecha, fechaMs) : maxFecha;
-      }, Number.NEGATIVE_INFINITY);
-
-      if (maxFechaServicio !== Number.NEGATIVE_INFINITY) {
-        return maxFechaServicio;
-      }
-
-      return -Number(bici?.id || 0);
+      }, 0);
+      return maxIdServicio || -Number(bici?.id || 0);
     };
-
-    return bicicletas
+    const listaBicis = Array.isArray(bicicletas) ? bicicletas : [];
+    return listaBicis
       .filter((bici) => {
         if (!busquedaLimpia) return true;
-        const textoBici = limpiarTexto(`${bici?.marca || ''} ${bici?.modelo || ''} ${bici?.color || ''}`);
-        const textoDueño = limpiarTexto(`${bici?.usuario?.nombre || ''} ${bici?.usuario?.apellido || ''}`);
-        return textoBici.includes(busquedaLimpia) || textoDueño.includes(busquedaLimpia);
+        const textoBici = limpiar(`${bici?.marca || ''} ${bici?.modelo || ''} ${bici?.color || ''}`);
+        const textoDuenio = limpiar(`${bici?.usuario?.nombre || ''} ${bici?.usuario?.apellido || ''}`);
+        return textoBici.includes(busquedaLimpia) || textoDuenio.includes(busquedaLimpia);
       })
       .sort((a, b) => obtenerUltimaActividad(b) - obtenerUltimaActividad(a))
       .slice(0, 10);
-  })();
+  })(); 
 
-  // Simula la llamada a la API para obtener bicicletas
+  // Petición inicial bicicletas
   async function traerBicicletas() {
     setCargando(true);
     try {
@@ -137,35 +129,60 @@ export default function PanelDueno() {
     setCargando(false);
   }
 
+  // NUEVO: Traer todos los clientes y sus bicis (asume ruta /usuarios es suficiente y trae bicicletas en el objeto)
+  async function traerClientes() {
+    setCargandoClientes(true);
+    try {
+      const res = await api.get('/usuarios');
+      console.log("DATOS CRUDOS DEL BACKEND:", res.data); // <--- AGREGÁ ESTO
+      setClientes(Array.isArray(res.data) ? res.data : []);
+    } catch (error) {
+      console.error(error);
+      setClientes([]);
+    }
+    setCargandoClientes(false);
+  }
+
   // Cargar bicicletas al iniciar
   useEffect(() => {
-    traerBicicletas();
+    if (vistaActiva === 'bicicletas') {
+      traerBicicletas();
+    }
     // eslint-disable-next-line
   }, []);
 
+  // Cuando cambia la pestaña activa, cargar clientes si corresponde
+  useEffect(() => {
+    if (vistaActiva === 'clientes') {
+      // Solo traemos si clientes está vacío para no repedir llamadas innecesarias
+      if (clientes.length === 0) {
+        traerClientes();
+      }
+    }
+    if (vistaActiva === 'bicicletas') {
+      // Si vuelve a bicicletas y no las tenemos, las traemos
+      if (bicicletas.length === 0) {
+        traerBicicletas();
+      }
+    }
+    // eslint-disable-next-line
+  }, [vistaActiva]);
+
   useEffect(() => {
     async function traerServiciosDeBici() {
-      // 1. Si no hay bici, limpiamos y cortamos acá
       if (!biciSeleccionada) {
         setServiciosBici([]);
         setCargandoServicios(false);
         return;
       }
-
       setCargandoServicios(true);
       try {
-        // 2. Pedimos TODOS los servicios al backend
         const res = await api.get('/servicios');
         const todosServicios = Array.isArray(res.data) ? res.data : [];
-        
-        // 3. Filtramos a mano acá en React
         const serviciosFiltrados = todosServicios.filter(
           (servicio) => servicio.bicicleta && servicio.bicicleta.id === biciSeleccionada.id
         );
-
-        // 4. Guardamos solo los que pasaron el filtro
         setServiciosBici(serviciosFiltrados);
-        
       } catch (error) {
         console.error("Error al traer servicios:", error);
         setServiciosBici([]);
@@ -173,7 +190,6 @@ export default function PanelDueno() {
         setCargandoServicios(false);
       }
     }
-
     traerServiciosDeBici();
   }, [biciSeleccionada]);
 
@@ -253,6 +269,7 @@ export default function PanelDueno() {
         nombre: nuevoCliNombre,
         apellido: nuevoCliApellido,
         dni: nuevoCliDni,
+        cuit: nuevoCliCuit,
         telefono: nuevoCliTelefono,
         email: nuevoCliEmail,
         password: nuevoCliDni,
@@ -261,6 +278,7 @@ export default function PanelDueno() {
       const resUsuarios = await api.get('/usuarios');
       const listaActualizada = Array.isArray(resUsuarios.data) ? resUsuarios.data : [];
       setUsuariosDisponibles(listaActualizada);
+      setClientes(listaActualizada);
 
       const creadoDesdePost = resCreado?.data?.id;
       const usuarioCreado =
@@ -308,15 +326,10 @@ export default function PanelDueno() {
 
   // Manejar eliminación
   const manejarEliminarBici = async (id) => {
-
     const confirmacion = window.confirm('¿Estás segura de que querés eliminar esta bicicleta?');
-    
     if (confirmacion) {
       try {
-        // Le mandamos el método DELETE a NestJS con el ID de la bici en la URL
         await api.delete(`/bicicletas/${id}`);
-        
-        // Si todo salió bien, volvemos a pedir la lista actualizada
         await traerBicicletas();
       } catch (error) {
         alert('Hubo un error al eliminar la bicicleta');
@@ -347,7 +360,6 @@ export default function PanelDueno() {
   const guardarEdicionBici = async (e) => {
     e.preventDefault();
     if (!biciEditando?.id) return;
-
     try {
       await api.patch(`/bicicletas/${biciEditando.id}`, {
         marca: biciEditando.marca,
@@ -436,14 +448,51 @@ export default function PanelDueno() {
       console.error(error);
     }
   };
-  
+
+  // Renderizado UI principal
   return (
     <div className="container mt-3">
       <div className="d-flex justify-content-between align-items-center">
         <h2 className="mb-0">Panel de Control - Dueño</h2>
         <button className="btn btn-success" onClick={abrirModal}>+ Nueva Bicicleta</button>
       </div>
-      {/* Modal Bootstrap 5 */}
+
+      {/* ===== NUEVAS TABS: Bicicletas & Clientes ===== */}
+      <ul className="nav nav-tabs mt-4" role="tablist">
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${vistaActiva === 'bicicletas' ? 'active' : ''}`}
+            type="button"
+            onClick={() => {
+              setVistaActiva('bicicletas');
+              setBusquedaBici('');
+              setBusquedaCliente('');
+            }}
+            role="tab"
+            aria-selected={vistaActiva === 'bicicletas'}
+          >
+            Bicicletas
+          </button>
+        </li>
+        <li className="nav-item" role="presentation">
+          <button
+            className={`nav-link ${vistaActiva === 'clientes' ? 'active' : ''}`}
+            type="button"
+            onClick={() => {
+              setVistaActiva('clientes');
+              setBusquedaBici('');
+              setBusquedaCliente('');
+            }}
+            role="tab"
+            aria-selected={vistaActiva === 'clientes'}
+          >
+            Clientes
+          </button>
+        </li>
+      </ul>
+      {/* ===== FIN TABS ===== */}
+
+      {/* Modales y detalles siguen IGUAL */}
       {modalAbierto && (
         <div className="modal show fade d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
           <div className="modal-dialog">
@@ -531,7 +580,7 @@ export default function PanelDueno() {
                                   value={busquedaCliente}
                                   onChange={(e) => {
                                     setBusquedaCliente(e.target.value);
-                                    setNuevoUsuarioId(''); // Limpiamos el ID si vuelve a escribir
+                                    setNuevoUsuarioId('');
                                   }}
                                 />
                                 <button
@@ -545,8 +594,6 @@ export default function PanelDueno() {
                                   + Nuevo
                                 </button>
                               </div>
-
-                              {/* 2. LA LISTA DESPLEGABLE FLOTANTE (Solo se ve si está buscando y no eligió a nadie) */}
                               {busquedaCliente && !nuevoUsuarioId && usuariosFiltrados.length > 0 && (
                                 <div 
                                   className="list-group position-absolute w-100 shadow" 
@@ -558,7 +605,6 @@ export default function PanelDueno() {
                                       type="button"
                                       className="list-group-item list-group-item-action text-start"
                                       onClick={() => {
-                                        // Cuando hace clic, guardamos el ID y escribimos el nombre en el input
                                         setNuevoUsuarioId(String(u.id));
                                         setBusquedaCliente(`${u.nombre || ''} ${u.apellido || ''} (ID: ${u.id})`.trim());
                                       }}
@@ -571,14 +617,11 @@ export default function PanelDueno() {
                                   ))}
                                 </div>
                               )}
-
-                              {/* 3. MENSAJE SI NO ENCUENTRA NADA */}
                               {busquedaCliente && !nuevoUsuarioId && usuariosFiltrados.length === 0 && (
                                 <p className="form-text text-danger mb-0 mt-1">
                                   No hay resultados. Por favor, hacé clic en "+ Nuevo" para registrarlo.
                                 </p>
                               )}
-                              
                             </div>
                           </>
                         ) : (
@@ -799,7 +842,6 @@ export default function PanelDueno() {
                 <h5 className="modal-title">Ficha Técnica - Bici #{biciSeleccionada.id}</h5>
                 <button type="button" className="btn-close btn-close-white" onClick={cerrarModalDetalles}></button>
               </div>
-              
               <div className="modal-body">
                 <div className="mb-3">
                   <h6 className="text-muted mb-1">Información General</h6>
@@ -808,9 +850,7 @@ export default function PanelDueno() {
                   <p className="mb-1"><strong>Tipo:</strong> {biciSeleccionada.tipo}</p>
                   <p className="mb-1"><strong>Dueño:</strong> {textoDueño(biciSeleccionada.usuario, 'No registrado')}</p>
                 </div>
-                
                 <hr />
-                
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
                     <h6 className="text-muted mb-0">Historial de Servicios</h6>
@@ -930,7 +970,6 @@ export default function PanelDueno() {
                   )}
                 </div>
               </div>
-              
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={cerrarModalDetalles}>
                   Cerrar
@@ -940,88 +979,177 @@ export default function PanelDueno() {
           </div>
         </div>
       )}
-
+      {/* ======================= INICIO Tabs Content ======================= */}
       <div className="card shadow-sm mt-4">
         <div className="card-body">
-          <h5 className="card-title mb-3">Bicicletas Registradas</h5>
-          <div className="mb-3">
-            <input
-              type="text"
-              className="form-control"
-              placeholder="Buscar por marca, modelo, color o dueño..."
-              value={busquedaBici}
-              onChange={(e) => setBusquedaBici(e.target.value)}
-            />
-            <p className="text-muted small mt-2 mb-0">
-              Mostrando las 10 bicicletas con actividad m&aacute;s reciente.
-            </p>
-          </div>
-
-          {cargando ? (
-            <div className="text-center py-5">
-              <div className="spinner-border text-primary" role="status">
-                <span className="visually-hidden">Cargando...</span>
+          {vistaActiva === 'bicicletas' && (
+            <>
+              <h5 className="card-title mb-3">Bicicletas Registradas</h5>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Buscar por marca, modelo, color o dueño..."
+                  value={busquedaBici}
+                  onChange={e => setBusquedaBici(e.target.value)}
+                />
+                <p className="text-muted small mt-2 mb-0">
+                  Mostrando las 10 bicicletas con actividad m&aacute;s reciente.
+                </p>
               </div>
-            </div>
-          ) : bicicletas.length === 0 ? (
-            <p className="text-center text-muted my-4">No hay bicicletas registradas todavía.</p>
-          ) : (
-            <div className="table-responsive">
-              <table className="table table-hover align-middle">
-                <thead className="table-light">
-                  <tr>
-                    <th>ID</th>
-                    <th>Marca</th>
-                    <th>Modelo</th>
-                    <th>Color</th>
-                    <th>Dueño</th>
-                    <th>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {bicicletasFiltradas.length === 0 ? (
-                    <tr>
-                      <td colSpan="6" className="text-center text-muted py-3">
-                        No se encontraron bicicletas
-                      </td>
-                    </tr>
-                  ) : (
-                    bicicletasFiltradas.map((bici) => (
-                      <tr key={bici.id}>
-                        <td>#{bici.id}</td>
-                        <td><strong>{bici.marca}</strong></td>
-                        <td>{bici.modelo}</td>
-                        <td>{bici.color || 'No especificado'}</td>
-                        <td>{textoDueño(bici.usuario, 'Sin asignar')}</td>
-                        <td>
-                          <button
-                            className="btn btn-sm btn-outline-primary me-2"
-                            onClick={() => setBiciSeleccionada(bici)}
-                          >
-                            Ver Detalles
-                          </button>
-                        <button
-                          className="btn btn-outline-warning btn-sm mx-1"
-                          onClick={() => abrirModalEditar(bici)}
-                        >
-                          Editar
-                        </button>
-                          <button
-                            className="btn btn-sm btn-outline-danger"
-                            onClick={() => manejarEliminarBici(bici.id)}
-                          >
-                            Eliminar
-                          </button>
-                        </td>
+              {cargando ? (
+                <div className="text-center py-5">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                  </div>
+                </div>
+              ) : bicicletas.length === 0 ? (
+                <p className="text-center text-muted my-4">No hay bicicletas registradas todavía.</p>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th>ID</th>
+                        <th>Marca</th>
+                        <th>Modelo</th>
+                        <th>Color</th>
+                        <th>Dueño</th>
+                        <th>Acciones</th>
                       </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody>
+                      {bicicletasFiltradas.length === 0 ? (
+                        <tr>
+                          <td colSpan="6" className="text-center text-muted py-3">
+                            No se encontraron bicicletas
+                          </td>
+                        </tr>
+                      ) : (
+                        bicicletasFiltradas.map((bici) => (
+                          <tr key={bici.id}>
+                            <td>#{bici.id}</td>
+                            <td><strong>{bici.marca}</strong></td>
+                            <td>{bici.modelo}</td>
+                            <td>{bici.color || 'No especificado'}</td>
+                            <td>{textoDueño(bici.usuario, 'Sin asignar')}</td>
+                            <td>
+                              <button
+                                className="btn btn-sm btn-outline-primary me-2"
+                                onClick={() => setBiciSeleccionada(bici)}
+                              >
+                                Ver Detalles
+                              </button>
+                            <button
+                              className="btn btn-outline-warning btn-sm mx-1"
+                              onClick={() => abrirModalEditar(bici)}
+                            >
+                              Editar
+                            </button>
+                              <button
+                                className="btn btn-sm btn-outline-danger"
+                                onClick={() => manejarEliminarBici(bici.id)}
+                              >
+                                Eliminar
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
+          )}
+
+          {vistaActiva === 'clientes' && (
+            <>
+              <h5 className="card-title mb-3">Gestión de Clientes</h5>
+              <div className="mb-3">
+                <input
+                  type="text"
+                  className="form-control"
+                  placeholder="Buscar por nombre, apellido, CUIT o DNI..."
+                  value={busquedaCliente}
+                  onChange={e => setBusquedaCliente(e.target.value)}
+                />
+              </div>
+              {cargandoClientes ? (
+                <div className="text-center py-4">
+                  <div className="spinner-border text-primary" role="status">
+                    <span className="visually-hidden">Cargando...</span>
+                  </div>
+                </div>
+              ) : clientes.length === 0 ? (
+                <p className="text-muted text-center py-3">No hay clientes registrados aún.</p>
+              ) : (
+                <div className="table-responsive">
+                  <table className="table table-hover align-middle">
+                    <thead className="table-light">
+                      <tr>
+                        <th>Nombre y Apellido</th>
+                        <th>CUIT / DNI</th>
+                        <th>Teléfono</th>
+                        <th>Email</th>
+                        <th>Bicis Registradas</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {clientesFiltrados.length === 0 ? (
+                        <tr>
+                          <td colSpan="5" className="text-center text-muted py-4">
+                            No se encontraron clientes
+                          </td>
+                        </tr>
+                      ) : (
+                        clientesFiltrados.map((cli) => (
+                          <tr key={cli.id}>
+                            <td>
+                              <span>{cli.nombre || ''} {cli.apellido || ''}</span>
+                            </td>
+                            <td>
+                              {(cli.cuit && cli.cuit.trim() !== '') ? (
+                                <span>
+                                  <strong>CUIT:</strong>{" "}
+                                  <span className="text-nowrap">{cli.cuit}</span>
+                                </span>
+                              ) : cli.dni ? (
+                                <span>
+                                  <strong>DNI:</strong>{" "}
+                                  <span className="text-nowrap">{cli.dni}</span>
+                                </span>
+                              ) : (
+                                <span className="text-muted">-</span>
+                              )}
+                            </td>
+
+                            <td>
+                              {cli.telefono || <span className="text-muted">-</span>}
+                            </td>
+                            <td style={{ minWidth: 180 }}>
+                              {cli.email
+                                ? <span className="text-break">{cli.email}</span>
+                                : <span className="text-muted">-</span>}
+                            </td>
+
+                            <td>
+                              <span className="badge bg-info text-dark">
+                                {Array.isArray(cli.bicicletas) ? cli.bicicletas.length : 0}
+                              </span>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>
+      {/* ======================= FIN Tabs Content ======================= */}
     </div>
   );
 }
