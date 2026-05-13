@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, OneToMany } from 'typeorm';
+import { Bicicleta } from '../../bicicletas/entities/bicicleta.entity';
 
 // Definimos los roles permitidos
 export enum RolUsuario {
@@ -37,4 +38,7 @@ export class Usuario {
 
   @CreateDateColumn()
   fecha_registro!: Date;
+
+  @OneToMany(() => Bicicleta, (bicicleta) => bicicleta.usuario)
+  bicicletas: Bicicleta[];
 }
