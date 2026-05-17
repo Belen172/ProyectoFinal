@@ -1,0 +1,566 @@
+/* Home — estilo pizarrón (chalkboard) */
+
+.chalkboard-home {
+  --chalk-bg: #121212;
+  --chalk-text: #f5f0e6;
+  --chalk-muted: #c9c4b8;
+  --chalk-accent: #e8e2d4;
+  --wood-dark: #3d2817;
+  --wood-mid: #5c4033;
+  --metal: #6b6358;
+
+  position: relative;
+  min-height: 100vh;
+  background-color: var(--chalk-bg);
+  color: var(--chalk-text);
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Textura de pizarrón */
+.chalkboard-home::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-color: var(--chalk-bg);
+  background-image:
+    radial-gradient(ellipse 120% 80% at 10% 20%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
+    radial-gradient(ellipse 100% 60% at 90% 80%, rgba(255, 255, 255, 0.03) 0%, transparent 45%),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(255, 255, 255, 0.015) 2px,
+      rgba(255, 255, 255, 0.015) 3px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0, 0, 0, 0.08) 2px,
+      rgba(0, 0, 0, 0.08) 3px
+    );
+  opacity: 0.95;
+}
+
+/* Collage marca de agua */
+.chalk-watermark {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: 0.5rem;
+  padding: 1rem;
+  pointer-events: none;
+  opacity: 0.1;
+}
+
+.chalk-watermark img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(0.9);
+}
+
+.chalkboard-fixed {
+  height: 100vh;
+  overflow: hidden;
+}
+
+.chalkboard-scroll {
+  min-height: 100vh;
+  height: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.chalk-page-body {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+/* Navbar compartida (Home, PanelCliente, etc.) */
+.chalk-navbar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem clamp(1rem, 3vw, 2rem) 0.6rem clamp(1rem, 3vw, 2rem);
+  min-height: 68px;
+  position: relative;
+  z-index: 10;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 1px 0 0 rgba(255, 255, 255, 0.08);
+}
+
+.chalk-navbar-spacer {
+  flex: 1;
+  min-width: 0.5rem;
+}
+
+.chalk-navbar-consulta-wrap {
+  flex: 0 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  min-width: 0;
+  padding-left: 0.5rem;
+}
+
+.chalk-brand-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.chalk-brand-link:hover .chalk-brand {
+  color: #fff;
+}
+
+.chalk-consulta-header-nav {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 500;
+  font-size: clamp(1rem, 1.35vw, 1.18rem);
+  letter-spacing: 0.05em;
+  line-height: 1.25;
+  text-align: right;
+  text-transform: uppercase;
+  color: var(--chalk-text);
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
+  max-width: min(100%, 22rem);
+}
+
+.chalk-consulta-header-nav:hover {
+  color: #fff;
+}
+
+.chalk-content {
+  position: relative;
+  z-index: 1;
+  max-width: 1520px;
+  margin: 0 auto;
+  padding: 1.5rem clamp(1rem, 3vw, 2rem) 3rem;
+  width: 100%;
+}
+
+.chalk-panel-cliente {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  max-width: 1144px;
+  margin: 0 auto;
+  padding: 1.25rem clamp(1rem, 3vw, 2rem) 2rem;
+  width: 100%;
+}
+
+.chalk-panel-cliente-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+}
+
+.chalk-panel-cliente-main--top {
+  justify-content: flex-start;
+}
+
+.chalkboard-footer {
+  margin-top: auto;
+  padding: 0.7rem clamp(1rem, 3vw, 2rem) 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.chalk-footer-brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  position: relative;
+}
+
+.chalk-footer-logo {
+  width: 29px;
+  height: 29px;
+  object-fit: contain;
+  background: transparent;
+  opacity: 0.9;
+}
+
+.chalk-footer-brand .chalk-login-fab-btn {
+  position: absolute;
+  left: calc(50% + 85px);
+  opacity: 0.68;
+  padding: 0;
+  background: none;
+  border: none;
+}
+
+.chalk-footer-brand .chalk-login-fab-btn:hover {
+  opacity: 1;
+  color: var(--chalk-accent);
+}
+
+/* Navbar superior — 3 zonas */
+.chalk-header {
+  display: grid;
+  grid-template-columns: minmax(0, auto) minmax(0, 1fr) minmax(0, auto);
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.5rem);
+  margin-bottom: 2.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(245, 240, 230, 0.12);
+}
+
+.chalk-header-title {
+  min-width: 0;
+}
+
+.chalk-brand {
+  font-size: clamp(2.5rem, 5.5vw, 4.1rem);
+  font-weight: 400;
+  color: var(--chalk-text);
+  line-height: 1;
+  margin: 0;
+  white-space: nowrap;
+  text-shadow:
+    1px 1px 0 rgba(255, 255, 255, 0.06),
+    -0.5px -0.5px 0 rgba(0, 0, 0, 0.3);
+}
+
+.chalk-brand-proyecto {
+  font-family: 'Oswald', sans-serif;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.chalk-brand-bike {
+  font-family: 'Homemade Apple', cursive;
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  text-transform: lowercase;
+}
+
+.chalk-header-consulta {
+  min-width: 0;
+  padding: 0 clamp(0.5rem, 2vw, 1.5rem);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.chalk-consulta-header {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(1rem, 1.5vw, 1.25rem);
+  line-height: 1.35;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
+}
+
+.chalk-header-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  min-width: 0;
+}
+
+.chalk-logo {
+  display: block;
+  width: clamp(56px, 8vw, 80px);
+  height: auto;
+  max-height: 80px;
+  object-fit: contain;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
+}
+
+.chalk-since {
+  font-family: 'Homemade Apple', cursive;
+  font-size: clamp(1.05rem, 1.6vw, 1.3rem);
+  font-weight: 400;
+  color: var(--chalk-accent);
+  text-align: center;
+  line-height: 1.15;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* Login privado — columna derecha */
+.chalk-col-right {
+  min-height: clamp(280px, 46vh, 480px);
+}
+
+.chalk-col-footer {
+  margin-top: auto;
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1.5rem;
+}
+
+.chalk-login-private {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--chalk-muted);
+  text-decoration: none;
+  padding: 0.25rem;
+  opacity: 0.55;
+  transition: color 0.2s, opacity 0.2s;
+}
+
+.chalk-login-private:hover {
+  color: var(--chalk-accent);
+  opacity: 1;
+}
+
+.chalk-login-private svg {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+.chalk-logo-center-wrapper {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-top: 1.5rem;
+}
+
+.chalk-logo-center {
+  max-height: 90px;
+  width: auto;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.16));
+}
+
+.chalk-logo-footer-row {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.2rem;
+  min-height: 2.2rem;
+  position: relative;
+}
+
+.chalk-logo-footer-row .chalk-login-fab-btn {
+  position: absolute;
+  left: calc(50% + 85px);
+  opacity: 0.68;
+  padding: 0;
+  background: none;
+  border: none;
+  transition: opacity 0.2s, color 0.18s;
+}
+
+.chalk-logo-footer-row .chalk-login-fab-btn:hover {
+  opacity: 1;
+  color: var(--chalk-accent);
+}
+
+@media (max-width: 991px) {
+  .chalk-navbar {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .chalk-navbar-spacer {
+    display: none;
+  }
+
+  .chalk-navbar-consulta-wrap {
+    width: 100%;
+    justify-content: center;
+    padding-left: 0;
+  }
+
+  .chalk-consulta-header-nav {
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .chalk-header-title {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .chalk-brand {
+    white-space: normal;
+  }
+}
+
+@media (max-width: 991px) {
+  .chalk-header {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto auto auto;
+    text-align: center;
+  }
+
+  .chalk-header-title {
+    display: flex;
+    justify-content: center;
+  }
+
+  .chalk-brand {
+    white-space: normal;
+  }
+
+  .chalk-header-consulta {
+    padding: 0 0.5rem;
+  }
+
+  .chalk-col-right {
+    min-height: 0;
+  }
+}
+
+/* Columnas */
+.chalk-columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+@media (min-width: 992px) {
+  .chalk-columns {
+    grid-template-columns: 1fr 1.38fr 1fr;
+    gap: 1.75rem;
+    align-items: start;
+  }
+
+  .chalk-col-center {
+    align-self: center;
+  }
+
+  .chalk-col-side {
+    padding-top: 0.5rem;
+  }
+}
+
+.chalk-col {
+  padding: 0 0.25rem;
+}
+
+.chalk-col-side {
+  display: flex;
+  flex-direction: column;
+}
+
+.chalk-col-title {
+  font-family: 'Oswald', sans-serif;
+  font-size: clamp(1.65rem, 3.2vw, 2.35rem);
+  font-weight: 700;
+  color: var(--chalk-text);
+  margin: 0 0 1.15rem;
+  line-height: 1.2;
+  letter-spacing: 0.05em;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.45);
+}
+
+.chalk-col-body {
+  font-family: 'Oswald', sans-serif;
+  font-weight: 300;
+  color: var(--chalk-muted);
+  font-size: clamp(1.05rem, 1.45vw, 1.19rem);
+  line-height: 1.65;
+  letter-spacing: 0.05em;
+  margin: 0.5em 0 0;
+}
+
+.chalk-consulta-link {
+  display: inline-block;
+  color: var(--chalk-accent);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  transition: color 0.2s;
+}
+
+.chalk-consulta-link:hover {
+  color: #fff;
+}
+
+/* Marco carrusel — madera / metal (~20% más grande) */
+.chalk-col-center {
+  width: 100%;
+}
+
+.carousel-frame {
+  padding: 12px;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 6px;
+  background: linear-gradient(160deg, var(--wood-mid) 0%, var(--wood-dark) 45%, #2a1f14 100%);
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.35),
+    inset 0 2px 4px rgba(255, 255, 255, 0.08),
+    0 12px 32px rgba(0, 0, 0, 0.45);
+  border: 2px solid #4a3728;
+}
+
+.carousel-frame-inner {
+  border: 1px solid var(--metal);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #1a1a1a;
+}
+
+.chalk-carousel .carousel-item img {
+  width: 100%;
+  height: clamp(264px, 46vh, 480px);
+  object-fit: cover;
+  border-radius: 10px;
+  filter: contrast(1.06) brightness(0.94) saturate(0.88) sepia(0.08);
+}
+
+.chalk-carousel .carousel-indicators {
+  margin-bottom: 0.5rem;
+}
+
+.chalk-carousel .carousel-indicators [data-bs-target] {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: var(--chalk-muted);
+  opacity: 0.5;
+  border: none;
+}
+
+.chalk-carousel .carousel-indicators .active {
+  opacity: 1;
+  background-color: var(--chalk-text);
+}
+
+.chalk-carousel .carousel-control-prev,
+.chalk-carousel .carousel-control-next {
+  width: 12%;
+  opacity: 0.7;
+}
+
+.chalk-carousel .carousel-control-prev-icon,
+.chalk-carousel .carousel-control-next-icon {
+  filter: invert(1) opacity(0.85);
+}

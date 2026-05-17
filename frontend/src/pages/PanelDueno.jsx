@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../api';
 
 const ESTADOS_SERVICIO = [
@@ -19,6 +20,8 @@ function textoDueño(usuario, sinAsignar) {
 }
 
 export default function PanelDueno() {
+  const navigate = useNavigate();
+
   // NUEVO: Estado para vista activa del tab
   const [vistaActiva, setVistaActiva] = useState('bicicletas'); // 'bicicletas' | 'clientes'
 
@@ -449,13 +452,26 @@ export default function PanelDueno() {
     }
   };
 
+  const cerrarSesion = () => {
+    localStorage.removeItem('access_token');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
   // Renderizado UI principal
   return (
     <div className="container mt-3">
-      <div className="d-flex justify-content-between align-items-center">
-        <h2 className="mb-0">Panel de Control - Dueño</h2>
-        <button className="btn btn-success" onClick={abrirModal}>+ Nueva Bicicleta</button>
-      </div>
+      <nav className="navbar navbar-expand navbar-dark bg-dark rounded mb-4 px-3">
+        <span className="navbar-brand mb-0 h1 fs-4">Panel de Control - Dueño</span>
+        <div className="ms-auto d-flex gap-2 align-items-center">
+          <button type="button" className="btn btn-success btn-sm" onClick={abrirModal}>
+            + Nueva Bicicleta
+          </button>
+          <button type="button" className="btn btn-outline-light btn-sm" onClick={cerrarSesion}>
+            Cerrar Sesión
+          </button>
+        </div>
+      </nav>
 
       {/* ===== NUEVAS TABS: Bicicletas & Clientes ===== */}
       <ul className="nav nav-tabs mt-4" role="tablist">
@@ -492,17 +508,23 @@ export default function PanelDueno() {
       </ul>
       {/* ===== FIN TABS ===== */}
 
-      {/* Modales y detalles siguen IGUAL */}
+      {/* Modales y detalles ahora usan tamaño igual: modal-xl y maxWidth 1200px */}
       {modalAbierto && (
         <div className="modal show fade d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-xl" style={{ maxWidth: '1200px' }}>
             <div className="modal-content">
               <form onSubmit={manejarCrearBici}>
                 <div className="modal-header">
                   <h5 className="modal-title">Registrar Bicicleta</h5>
                   <button type="button" className="btn-close" onClick={cerrarModal}></button>
                 </div>
-                <div className="modal-body">
+                <div 
+                  className="modal-body"
+                  style={{
+                    maxHeight: '70vh',
+                    overflowY: 'auto',
+                  }}
+                >
                   <div className="mb-3">
                     <label className="form-label">Marca</label>
                     <input
@@ -570,7 +592,6 @@ export default function PanelDueno() {
                           <>
                             {/* CONTENEDOR PRINCIPAL DEL AUTOCOMPLETE */}
                             <div className="position-relative mb-3">
-                              
                               {/* 1. EL BUSCADOR Y EL BOTÓN NUEVO */}
                               <div className="input-group">
                                 <input
@@ -625,7 +646,14 @@ export default function PanelDueno() {
                             </div>
                           </>
                         ) : (
-                          <div className="border rounded p-2 bg-light">
+                          // NUEVO: Contenedor con scroll para el formulario de Nuevo Cliente
+                          <div
+                            className="border rounded p-2 bg-light pe-2"
+                            style={{
+                              maxHeight: '450px',
+                              overflowY: 'auto',
+                            }}
+                          >
                             <div className="row g-2">
                               <div className="col-12 col-md-6">
                                 <input
@@ -682,6 +710,7 @@ export default function PanelDueno() {
                                 />
                               </div>
                             </div>
+                            {/* Los botones quedan dentro del scroll para que siempre estén visibles dentro del área, arriba del error crear cliente */}
                             <div className="d-flex justify-content-end gap-2 mt-2">
                               <button
                                 type="button"
@@ -727,7 +756,7 @@ export default function PanelDueno() {
                     )}
                   </div>
                 </div>
-                <div className="modal-footer">
+                <div className="modal-footer" style={{ position: 'sticky', bottom: 0, background: '#fff', zIndex: 15 }}>
                   <button type="button" className="btn btn-secondary" onClick={cerrarModal}>
                     Cancelar
                   </button>
@@ -747,7 +776,7 @@ export default function PanelDueno() {
 
       {modalEditarAbierto && (
         <div className="modal show fade d-block" tabIndex="-1" style={{ backgroundColor: "rgba(0,0,0,0.4)" }}>
-          <div className="modal-dialog">
+          <div className="modal-dialog modal-xl" style={{ maxWidth: '1200px' }}>
             <div className="modal-content">
               <form onSubmit={guardarEdicionBici}>
                 <div className="modal-header">
@@ -1006,9 +1035,12 @@ export default function PanelDueno() {
               ) : bicicletas.length === 0 ? (
                 <p className="text-center text-muted my-4">No hay bicicletas registradas todavía.</p>
               ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead className="table-light">
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: '400px', overflowY: 'auto' }}
+                >
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light sticky-top" style={{ zIndex: 10 }}>
                       <tr>
                         <th>ID</th>
                         <th>Marca</th>
@@ -1040,12 +1072,12 @@ export default function PanelDueno() {
                               >
                                 Ver Detalles
                               </button>
-                            <button
-                              className="btn btn-outline-warning btn-sm mx-1"
-                              onClick={() => abrirModalEditar(bici)}
-                            >
-                              Editar
-                            </button>
+                              <button
+                                className="btn btn-outline-warning btn-sm mx-1"
+                                onClick={() => abrirModalEditar(bici)}
+                              >
+                                Editar
+                              </button>
                               <button
                                 className="btn btn-sm btn-outline-danger"
                                 onClick={() => manejarEliminarBici(bici.id)}
@@ -1084,9 +1116,12 @@ export default function PanelDueno() {
               ) : clientes.length === 0 ? (
                 <p className="text-muted text-center py-3">No hay clientes registrados aún.</p>
               ) : (
-                <div className="table-responsive">
-                  <table className="table table-hover align-middle">
-                    <thead className="table-light">
+                <div
+                  className="table-responsive"
+                  style={{ maxHeight: '400px', overflowY: 'auto' }}
+                >
+                  <table className="table table-hover align-middle mb-0">
+                    <thead className="table-light sticky-top" style={{ zIndex: 10 }}>
                       <tr>
                         <th>Nombre y Apellido</th>
                         <th>CUIT / DNI</th>
