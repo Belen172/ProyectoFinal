@@ -50,6 +50,29 @@ export class UsuariosService {
     });
   }
 
+  async findByEmailOrDni(identificador: string): Promise<Usuario | null> {
+    return this.usuarioRepository.findOne({
+      where: [{ email: identificador }, { dni: identificador }],
+      select: [
+        'id',
+        'nombre',
+        'apellido',
+        'dni',
+        'email',
+        'rol',
+        'password',
+        'fecha_registro',
+      ],
+    });
+  }
+
+async findByEmailConPassword(email: string) {
+  return await this.usuarioRepository.findOne({
+    where: { email },
+    select: ['id', 'nombre', 'apellido', 'password', 'rol'] 
+  });
+}
+
   // BUSCAR POR ID:
   async findOne(id: number) {
     return this.usuarioRepository.findOne({
