@@ -204,7 +204,7 @@
 
 .chalk-footer-brand .chalk-login-fab-btn {
   position: absolute;
-  left: calc(50% + 85px);
+  left: calc(50% + 115px);
   opacity: 0.68;
   padding: 0;
   background: none;
@@ -366,7 +366,7 @@
 
 .chalk-logo-footer-row .chalk-login-fab-btn {
   position: absolute;
-  left: calc(50% + 85px);
+  left: calc(50% + 100px);
   opacity: 0.68;
   padding: 0;
   background: none;
@@ -564,3 +564,31 @@
 .chalk-carousel .carousel-control-next-icon {
   filter: invert(1) opacity(0.85);
 }
+
+.chalk-dni-input::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important; /* El texto 'Ingresá tu DNI' se lea sutil pero claro */
+}
+
+/* Evita que las flechitas del input de tipo número arruinen el centrado */
+.chalk-dni-input::-webkit-outer-spin-button,
+.chalk-dni-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Oculta el enlace de consulta del Navbar únicamente cuando estemos dentro del Panel de Clientes */
+.chalk-panel-cliente ~ .chalk-navbar .chalk-navbar-consulta-wrap,
+.chalkboard-home:has(.chalk-panel-cliente) .chalk-navbar-consulta-wrap {
+  display: none !important;
+}
+
+.chalk-panel-cliente {
+  padding-bottom: 0.5rem !important; /* Achica el margen del contenedor para dejar bajar al footer */
+}
+
+/* Le da un margen final al cuerpo de las páginas con scroll para que el footer no quede pegado al piso */
+.chalkboard-scroll .chalk-page-body {
+  padding-bottom: 2rem !important;
+}
+
+/* Al final de tu Home.css */

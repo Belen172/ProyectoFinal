@@ -8,7 +8,7 @@ export default function Home() {
   const carouselId = 'carouselTaller';
 
   return (
-    <ChalkboardLayout>
+    <ChalkboardLayout scrollable>
       <div
         className="chalk-content"
         style={{
@@ -81,23 +81,6 @@ export default function Home() {
               </div>
             </div>
 
-            <div className="chalk-logo-center-wrapper">
-              <img
-                src={logoTaller}
-                alt="Logo del taller"
-                className="chalk-logo chalk-logo-center"
-              />
-              <div className="chalk-logo-footer-row">
-                <span className="chalk-since">desde 11/12/2020</span>
-                <Link
-                  to="/login"
-                  aria-label="Iniciar sesión"
-                  className="chalk-login-private chalk-login-fab-btn"
-                >
-                  <LogIn size={17} strokeWidth={1.2} aria-hidden />
-                </Link>
-              </div>
-            </div>
           </section>
 
           <section className="chalk-col chalk-col-side chalk-col-right">
@@ -109,6 +92,75 @@ export default function Home() {
             </p>
           </section>
         </div>
+
+        {/* LOGO + FECHA CENTRADOS EN EJE VERTICAL */}
+        <div
+          className="chalk-logo-center-wrapper"
+          style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.4rem',          // Da el espacio exacto entre el logo y la fecha
+            marginTop: '2rem',      // Empuja el bloque un poquito hacia abajo desde el carrusel
+            position: 'relative',
+          }}
+        >
+          {/* Logo del taller */}
+          <img
+            src={logoTaller}
+            alt="Logo del taller"
+            style={{
+              maxHeight: '75px',
+              width: 'auto',
+              display: 'block',
+              filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.16))',
+            }}
+          />
+
+          {/* Línea con la fecha y el login alineados */}
+          <div
+            style={{
+              width: '100%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              minHeight: '1.8rem',
+            }}
+          >
+            <span className="chalk-since" style={{ margin: 0 }}>
+              desde 11/12/2020
+            </span>
+            
+            {/* Botón de LogIn flotando a la derecha sin descentrar la fecha */}
+            <Link
+              to="/login"
+              aria-label="Iniciar sesión"
+              className="chalk-login-private chalk-login-fab-btn"
+              tabIndex={0}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                position: 'absolute',
+                left: 'calc(50% + 95px)', // Mismo espacio que usamos en el CSS
+                color: 'var(--chalk-muted)',
+                padding: 0,
+                background: 'none',
+                border: 'none',
+                opacity: 0.68,
+                textDecoration: 'none',
+                transition: 'opacity 0.2s',
+              }}
+              onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+              onMouseLeave={e => (e.currentTarget.style.opacity = '0.68')}
+            >
+              <LogIn size={17} strokeWidth={1.2} />
+            </Link>
+          </div>
+        </div>                    
+
       </div>
     </ChalkboardLayout>
   );
