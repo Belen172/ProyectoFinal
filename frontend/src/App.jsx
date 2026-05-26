@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const location = useLocation();
-  const rutasChalkboard = ['/', '/cliente'];
+  const rutasChalkboard = ['/', '/cliente', '/login', '/dueño'];
   const usaLayoutChalkboard = rutasChalkboard.includes(location.pathname);
 
   return (

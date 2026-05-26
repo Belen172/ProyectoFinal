@@ -576,12 +576,6 @@
   margin: 0;
 }
 
-/* Oculta el enlace de consulta del Navbar únicamente cuando estemos dentro del Panel de Clientes */
-.chalk-panel-cliente ~ .chalk-navbar .chalk-navbar-consulta-wrap,
-.chalkboard-home:has(.chalk-panel-cliente) .chalk-navbar-consulta-wrap {
-  display: none !important;
-}
-
 .chalk-panel-cliente {
   padding-bottom: 0.5rem !important; /* Achica el margen del contenedor para dejar bajar al footer */
 }

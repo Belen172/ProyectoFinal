@@ -1,6 +1,8 @@
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 export default function ChalkNavbar() {
+  const location = useLocation();
+
   return (
     <nav className="chalk-navbar">
       <div className="chalk-header-title">
@@ -13,12 +15,15 @@ export default function ChalkNavbar() {
       </div>
       <div className="chalk-navbar-spacer" aria-hidden="true" />
       <div className="chalk-navbar-consulta-wrap">
-        <Link
-          to="/cliente"
-          className="chalk-consulta-link chalk-consulta-header-nav"
-        >
-          CONSULTÁ EL ESTADO DE TU BICICLETA
-        </Link>
+        {/* Se muestra SOLO si estamos en la Home (ruta raíz '/') */}
+        {location.pathname === '/' && (
+          <Link
+            to="/cliente"
+            className="chalk-consulta-link chalk-consulta-header-nav"
+          >
+            CONSULTÁ EL ESTADO DE TU BICICLETA
+          </Link>
+        )}
       </div>
     </nav>
   );
