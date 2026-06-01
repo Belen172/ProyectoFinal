@@ -7,7 +7,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 
 function AppContent() {
   const location = useLocation();
-  const rutasChalkboard = ['/', '/cliente', '/login', '/dueño'];
+  const rutasChalkboard = ['/', '/cliente', '/login', '/dueno'];
   const usaLayoutChalkboard = rutasChalkboard.includes(location.pathname);
 
   return (
@@ -39,7 +39,7 @@ function AppContent() {
                   </Link>
                 </li>
                 <li className="nav-item">
-                  <Link className="nav-link" to="/dueño">
+                  <Link className="nav-link" to="/dueno">
                     Dueño
                   </Link>
                 </li>
@@ -59,7 +59,7 @@ function AppContent() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route
-            path="/dueño"
+            path="/dueno"
             element={
               <ProtectedRoute>
                 <PanelDueno />

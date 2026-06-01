@@ -18,7 +18,7 @@ export default function Login() {
       const { data } = await api.post('/auth/login', { identificador: usuario, password });
       localStorage.setItem('access_token', data.access_token);
       localStorage.setItem('user', JSON.stringify(data.usuario));
-      data.usuario.rol === 'ADMIN' ? navigate('/dueño') : navigate('/cliente');
+      data.usuario.rol === 'ADMIN' ? navigate('/dueno') : navigate('/cliente');
     } catch { setError('Usuario o contraseña incorrectos'); }
     finally { setCargando(false); }
   };
@@ -77,9 +77,34 @@ export default function Login() {
         </div>
 
         {/* Footer: Este div SIEMPRE quedará debajo del formulario por el flex-grow-1 de arriba */}
-        <div className="d-flex flex-column align-items-center mb-4">
-          <img src={logoTaller} alt="Logo" style={{ maxHeight: '60px', filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.5))' }} />
-          <span style={{ fontFamily: "'Homemade Apple', cursive", fontSize: '0.9rem', color: '#fff', marginTop: '5px' }}>
+        <div
+          className="chalk-logo-center-wrapper"
+          style={{
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: '0.4rem',
+            /* Regulamos el aire superior dinámicamente para calzar la Home */
+            marginTop: '2rem', 
+            paddingBottom: '2.5rem',
+            position: 'relative',
+            zIndex: 10,
+          }}
+        >
+        {/* Logo del taller */}
+        <img
+            src={logoTaller}
+            alt="Logo del taller"
+            style={{
+              maxHeight: '75px',
+              width: 'auto',
+              display: 'block',
+              filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.16))',
+            }}
+          />
+          {/* Fecha en cursiva */}
+          <span className="chalk-since" style={{ margin: 0 }}>
             desde 11/12/2020
           </span>
         </div>

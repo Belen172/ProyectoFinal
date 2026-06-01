@@ -7,6 +7,9 @@ import ChalkboardLayout from '../components/ChalkboardLayout';
 export default function Home() {
   const carouselId = 'carouselTaller';
 
+  // Le pregunto al navegador si hay una sesión guardada
+  const estaLogueado = localStorage.getItem('access_token');
+
   return (
     <ChalkboardLayout scrollable>
       <div
@@ -94,6 +97,7 @@ export default function Home() {
         </div>
 
         {/* LOGO + FECHA CENTRADOS EN EJE VERTICAL */}
+        {/* Footer: Este div SIEMPRE quedará debajo del formulario por el flex-grow-1 de arriba */}
         <div
           className="chalk-logo-center-wrapper"
           style={{
@@ -101,13 +105,16 @@ export default function Home() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: '0.4rem',          // Da el espacio exacto entre el logo y la fecha
-            marginTop: '2rem',      // Empuja el bloque un poquito hacia abajo desde el carrusel
+            gap: '0.4rem',
+            /* Regulamos el aire superior dinámicamente para calzar la Home */
+            marginTop: '2rem', 
+            paddingBottom: '2.5rem',
             position: 'relative',
+            zIndex: 10,
           }}
         >
-          {/* Logo del taller */}
-          <img
+        {/* Logo del taller */}
+        <img
             src={logoTaller}
             alt="Logo del taller"
             style={{
@@ -135,7 +142,7 @@ export default function Home() {
             
             {/* Botón de LogIn flotando a la derecha sin descentrar la fecha */}
             <Link
-              to="/login"
+              to={estaLogueado ? "/dueno" : "/login"}
               aria-label="Iniciar sesión"
               className="chalk-login-private chalk-login-fab-btn"
               tabIndex={0}
