@@ -22,6 +22,9 @@ export class Bicicleta {
   @Column({ type: 'text', nullable: true })
   observaciones!: string;
 
+  @Column({ type: 'boolean', default: true })
+  activa!: boolean;
+
   // Relación: Muchas bicicletas pertenecen a un Usuario
   @ManyToOne(() => Usuario) 
   @JoinColumn({ name: 'usuario_id' })

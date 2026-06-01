@@ -29,6 +29,7 @@ export class BicicletasService {
 
   async findAll() {
     return this.bicicletaRepository.find({
+      where: { activa: true },
       // 1. Le decimos que traiga la relación (el nombre 'usuario' sale de tu entidad)
       relations: ['usuario', 'servicios'], 
       
@@ -78,9 +79,9 @@ export class BicicletasService {
     return this.findOne(id); // Devolvemos la bici actualizada para ver cómo quedó
   }
 
-  // ELIMINAR:
+  // BORRADO LÓGICO (soft delete):
   async remove(id: number) {
-    await this.bicicletaRepository.delete(id);
+    await this.bicicletaRepository.update(id, { activa: false });
     return { mensaje: `Bicicleta con id ${id} eliminada correctamente` };
   }
 
