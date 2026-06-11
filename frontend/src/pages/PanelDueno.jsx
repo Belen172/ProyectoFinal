@@ -345,7 +345,7 @@ export default function PanelDueno() {
   }; */
 
   const archivarBicicleta = async (idBici) => {
-    const confirmar = window.confirm("¿Estás segura de que querés archivar esta bicicleta? Ya no aparecerá en la lista activa, pero su historial se mantendrá guardado.");
+    const confirmar = window.confirm("¿Estás seguro de que querés archivar esta bicicleta? Ya no aparecerá en la lista activa, pero su historial se mantendrá guardado.");
     
     if (confirmar) {
       try {
@@ -445,12 +445,53 @@ export default function PanelDueno() {
     }
   };
 
-  const manejarCambioEstado = async (servicioId, nuevoEstado) => {
+  /* const manejarCambioEstado = async (servicioId, nuevoEstado) => {
     try {
       await api.patch(`/servicios/${servicioId}`, { estado: nuevoEstado });
       setServiciosBici((prev) =>
         prev.map((s) => (s.id === servicioId ? { ...s, estado: nuevoEstado } : s))
       );
+    } catch (error) {
+      alert('No se pudo actualizar el estado del servicio');
+      console.error(error);
+    }
+  };*/
+
+  const manejarCambioEstado = async (servicioId, nuevoEstado) => {
+    try {
+      // 1. Actualizo el estado en el backend
+      await api.patch(`/servicios/${servicioId}`, { estado: nuevoEstado });
+      
+      // 2. Actualizo la tabla visualmente
+      setServiciosBici((prev) =>
+        prev.map((s) => (s.id === servicioId ? { ...s, estado: nuevoEstado } : s))
+      );
+
+      // 3. Lógica de WhatsApp (Solo si cambió a TERMINADO)
+      if (nuevoEstado === 'TERMINADO') {
+        const cliente = biciSeleccionada?.usuario;
+        
+        // Verifico que el cliente exista y tenga cargado un teléfono
+        if (cliente && cliente.telefono) {
+          const confirmarWsp = window.confirm('El estado se actualizó a TERMINADO. ¿Querés avisarle al cliente por WhatsApp?');
+          
+          if (confirmarWsp) {
+            // Limpio el número por si en el registro le pusieron espacios o guiones
+            const numeroLimpio = String(cliente.telefono).replace(/\D/g, '');
+            
+            // Armo el mensaje automático
+            const mensaje = `¡Hola ${cliente.nombre}! Te avisamos desde PROYECTO bike que tu bicicleta ${biciSeleccionada.marca} ya está lista para retirar. ¡Te esperamos!`;
+            
+            // Abrio WhatsApp Web/App en una pestaña nueva
+            const urlWsp = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
+            window.open(urlWsp, '_blank');
+          }
+        } else {
+          // Si no tiene teléfono guardado, solo hago un console.log para no molestar con otra alerta
+          console.log('El estado se actualizó, pero el cliente no tiene un teléfono registrado para enviar el aviso.');
+        }
+      }
+
     } catch (error) {
       alert('No se pudo actualizar el estado del servicio');
       console.error(error);

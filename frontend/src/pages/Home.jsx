@@ -9,7 +9,7 @@ export default function Home() {
 
   // Le pregunto al navegador si hay una sesión guardada
   const estaLogueado = localStorage.getItem('access_token');
-
+  
   return (
     <ChalkboardLayout scrollable>
       <div
