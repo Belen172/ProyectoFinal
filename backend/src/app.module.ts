@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BicicletasModule } from './bicicletas/bicicletas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
@@ -13,23 +13,28 @@ import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
-  ConfigModule.forRoot(),
+  // Esto carga las variables de entorno de forma global
+  ConfigModule.forRoot({
+    isGlobal: true, 
+  }),
 
   // INICIO EL TEMPORIZADOR
   ScheduleModule.forRoot(),
 
-  // CONFIGURAMOS EL MÓDULO DE GMAIL
+  // CONFIGURAMOS EL MÓDULO DE GMAIL. El Mailer ahora usa el ConfigService para ir a buscar las variables seguras
   MailerModule.forRootAsync({
-    useFactory: () => ({
+    imports: [ConfigModule],
+    inject: [ConfigService],
+    useFactory: (config: ConfigService) => ({
       transport: {
         service: 'gmail',
         auth: {
-          user: process.env.GMAIL_USER, // Toma el correo de tu archivo .env
-          pass: process.env.GMAIL_PASS, // Toma la contraseña de 16 letras de tu .env
+          user: config.get<string>('GMAIL_USER'), // Toma el correo de tu archivo .env
+          pass: config.get<string>('GMAIL_PASS'), // Toma la contraseña de 16 letras de tu .env
         },
       },
       defaults: {
-        from: `"PROYECTO bike" <${process.env.GMAIL_USER}>`, // Así aparece el remitente lindo en la bandeja
+        from: `"PROYECTO bike" <${config.get<string>('GMAIL_USER')}>`, // Así aparece el remitente lindo en la bandeja
       },
     }),
   }),
