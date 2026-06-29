@@ -50,6 +50,11 @@ import { PassportModule } from '@nestjs/passport';
       autoLoadEntities: true, // detecta automáticamente tus entidades
       synchronize: true, // sincroniza el esquema de la base de datos (solo en desarrollo) 
                           // SOLO en desarrollo, crea/actualiza tablas
+      extra: {
+        ssl: {
+          rejectUnauthorized: false, // Esto es necesario para Aiven en producción
+        },
+      },
     }),
   BicicletasModule,
   UsuariosModule,
