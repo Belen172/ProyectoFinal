@@ -19,17 +19,19 @@ import { MailerModule } from '@nestjs-modules/mailer';
   ScheduleModule.forRoot(),
 
   // CONFIGURAMOS EL MÓDULO DE GMAIL
-  MailerModule.forRoot({
-    transport: {
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER, // Toma el correo de tu archivo .env
-        pass: process.env.GMAIL_PASS, // Toma la contraseña de 16 letras de tu .env
+  MailerModule.forRootAsync({
+    useFactory: () => ({
+      transport: {
+        service: 'gmail',
+        auth: {
+          user: process.env.GMAIL_USER, // Toma el correo de tu archivo .env
+          pass: process.env.GMAIL_PASS, // Toma la contraseña de 16 letras de tu .env
+        },
       },
-    },
-    defaults: {
-      from: `"PROYECTO bike" <${process.env.GMAIL_USER}>`, // Así aparece el remitente lindo en la bandeja
-    },
+      defaults: {
+        from: `"PROYECTO bike" <${process.env.GMAIL_USER}>`, // Así aparece el remitente lindo en la bandeja
+      },
+    }),
   }),
 
   TypeOrmModule.forRoot({
