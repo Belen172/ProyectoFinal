@@ -8,13 +8,15 @@ import { AuthService } from './auth.service';
 @Module({
   imports: [
     UsuariosModule,
+    ConfigModule, // Asegurate que esté importado
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET') ?? 'clave-secreta-dev',
-        signOptions: { expiresIn: '24h' },
-      }),
       inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.get<string>('JWT_SECRET'),
+        signOptions: { expiresIn: '1d' },
+      }),
     }),
   ],
   controllers: [AuthController],
@@ -22,3 +24,4 @@ import { AuthService } from './auth.service';
   exports: [AuthService, JwtModule],
 })
 export class AuthModule {}
+

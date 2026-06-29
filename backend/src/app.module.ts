@@ -9,6 +9,7 @@ import { ServiciosModule } from './servicios/servicios.module';
 import { AuthModule } from './auth/auth.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { PassportModule } from '@nestjs/passport';
 
 
 @Module({
