@@ -12,6 +12,18 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
+    // Primero, intentamos la comparación de bcrypt (por si tenés usuarios encriptados)
+    let passwordValida = await bcrypt.compare(loginDto.password, usuario.password);
+    
+    // Si no es válida, probamos comparación directa (por si el usuario está en texto plano)
+    if (!passwordValida) {
+      passwordValida = loginDto.password === usuario.password;
+    }
+
+    if (!passwordValida) {
+      throw new UnauthorizedException('Credenciales inválidas');
+    }
+
     const usuario = await this.usuariosService.findByEmailOrDni(
       loginDto.identificador,
     );
