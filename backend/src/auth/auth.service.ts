@@ -12,35 +12,33 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
-    // Primero, intentamos la comparación de bcrypt (por si tenés usuarios encriptados)
-    let passwordValida = await bcrypt.compare(loginDto.password, usuario.password);
-    
-    // Si no es válida, probamos comparación directa (por si el usuario está en texto plano)
-    if (!passwordValida) {
-      passwordValida = loginDto.password === usuario.password;
-    }
-
-    if (!passwordValida) {
-      throw new UnauthorizedException('Credenciales inválidas');
-    }
-
+    // 1. Buscamos primero al usuario
     const usuario = await this.usuariosService.findByEmailOrDni(
       loginDto.identificador,
     );
 
+    // 2. Si no existe, cortamos acá mismo
     if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
-    const passwordValida = await bcrypt.compare(
+    // 3. Probamos encriptación bcrypt primero
+    let passwordValida = await bcrypt.compare(
       loginDto.password,
       usuario.password,
     );
 
+    // 4. Si bcrypt falla, probamos comparación directa (texto plano)
+    if (!passwordValida) {
+      passwordValida = loginDto.password === usuario.password;
+    }
+
+    // 5. Si después de ambas pruebas sigue siendo inválida, tiramos el error
     if (!passwordValida) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // 6. Si llegamos acá, todo está bien, generamos el payload y el token
     const payload = {
       sub: usuario.id,
       email: usuario.email,
