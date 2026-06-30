@@ -12,31 +12,26 @@ export class AuthService {
   ) {}
 
   async login(loginDto: LoginDto) {
-    // 1. Buscamos primero al usuario
-    const usuario = await this.usuariosService.findByEmailOrDni(
-      loginDto.identificador,
-    );
+    const usuario = await this.usuariosService.findByEmailOrDni(loginDto.identificador);
 
-    // 2. Si no existe, cortamos acá mismo
+    // LOG DE SEGURIDAD: Esto se verá en los logs de Vercel (no en la consola del navegador)
+    console.log("Intento de login para:", loginDto.identificador);
+    
     if (!usuario) {
+      console.log("Usuario NO encontrado en la BD");
       throw new UnauthorizedException('Credenciales inválidas');
     }
-
-    // 3. Probamos encriptación bcrypt primero
-    let passwordValida = await bcrypt.compare(
-      loginDto.password,
-      usuario.password,
-    );
-
-    // 4. Si bcrypt falla, probamos comparación directa (texto plano)
+  
+    // Comparamos
+    let passwordValida = await bcrypt.compare(loginDto.password, usuario.password);
+    if (!passwordValida) passwordValida = loginDto.password === usuario.password;
+  
     if (!passwordValida) {
-      passwordValida = loginDto.password === usuario.password;
-    }
-
-    // 5. Si después de ambas pruebas sigue siendo inválida, tiramos el error
-    if (!passwordValida) {
+      console.log("La contraseña NO coincide para el usuario:", usuario.email);
       throw new UnauthorizedException('Credenciales inválidas');
     }
+  
+    console.log("Login exitoso para:", usuario.email);
 
     // 6. Si llegamos acá, todo está bien, generamos el payload y el token
     const payload = {
