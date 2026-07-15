@@ -71,10 +71,19 @@ export class BicicletasService {
   async findOne(id: number) {
     return this.bicicletaRepository.findOne({
       where: { id },
-      relations: ['usuario'], // Traemos al dueño también
+      relations: ['usuario', 'servicios'], // Traemos al dueño también
       select: {
         id: true, marca: true, modelo: true, tipo: true, observaciones: true,
-        usuario: { id: true, nombre: true, apellido: true, telefono: true, email: true }
+        usuario: { id: true, nombre: true, apellido: true, telefono: true, email: true },
+        servicios: {
+          id: true,
+          fecha_ingreso: true,
+          estado: true,
+          problema_informado: true,
+          trabajo_realizado: true,
+          fecha_entrega: true,
+          precio: true
+        }
       }
     });
   }

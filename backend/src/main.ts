@@ -7,7 +7,7 @@ async function bootstrap() {
 
   // Habilita CORS para que el frontend pueda comunicarse con el backend
   app.enableCors({
-    origin: 'https://proyecto-bike.vercel.app', // La URL exacta de tu frontend
+    origin: ['http://localhost:5173', 'https://proyecto-bike.vercel.app'], // La URL exacta de tu frontend
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
