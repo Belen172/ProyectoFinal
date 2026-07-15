@@ -470,6 +470,13 @@ export default function PanelDueno() {
       // 3. Lógica de WhatsApp (Solo si cambió a TERMINADO)
       if (nuevoEstado === 'TERMINADO') {
         const cliente = biciSeleccionada?.usuario;
+
+        // CORRECCIÓN 1: Asegurar que existan servicios antes de buscar el último
+        const servicios = biciSeleccionada?.servicios || [];
+        const ultimoservicio = servicios[servicios.length - 1];
+        
+        // CORRECCIÓN 2: Si no encuentra el servicio, dejamos un valor por defecto (0)
+        const preciofinal = ultimoservicio?.precio || 0;
         
         // Verifico que el cliente exista y tenga cargado un teléfono
         if (cliente && cliente.telefono) {
@@ -479,8 +486,12 @@ export default function PanelDueno() {
             // Limpio el número por si en el registro le pusieron espacios o guiones
             const numeroLimpio = String(cliente.telefono).replace(/\D/g, '');
             
+            // Agregá esto antes de la línea del 'const mensaje'
+            console.log("Servicios encontrados:", servicios);
+            console.log("Último servicio:", ultimoservicio);
+
             // Armo el mensaje automático
-            const mensaje = `¡Hola ${cliente.nombre}! Te avisamos desde PROYECTO bike que tu bicicleta ${biciSeleccionada.marca} ya está lista para retirar. ¡Te esperamos!`;
+            const mensaje = `¡Hola ${cliente.nombre}! Te avisamos desde PROYECTO bike que tu bicicleta ${biciSeleccionada.marca} ya está lista para retirar. El costo de este servicio es de $${preciofinal}.\n Si preferís abonar por transferencia, podés hacerlo a nuestro alias: davidleandri.x\n Una vez realizada, si podés, enviame el comprobante por acá. ¡Te esperamos!`;
             
             // Abrio WhatsApp Web/App en una pestaña nueva
             const urlWsp = `https://wa.me/${numeroLimpio}?text=${encodeURIComponent(mensaje)}`;
