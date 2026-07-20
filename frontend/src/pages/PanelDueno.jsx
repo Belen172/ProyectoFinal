@@ -45,6 +45,9 @@ export default function PanelDueno() {
   const [mostrandoFormServicio, setMostrandoFormServicio] = useState(false);
   const [nuevoProblema, setNuevoProblema] = useState('');
   const [nuevoPrecio, setNuevoPrecio] = useState('');
+  const [servicioEditandoId, setServicioEditandoId] = useState(null);
+  const [editProblema, setEditProblema] = useState('');
+  const [editPrecio, setEditPrecio] = useState('');
   const [usuariosDisponibles, setUsuariosDisponibles] = useState([]);
   const [cargandoUsuariosModal, setCargandoUsuariosModal] = useState(false);
   const [busquedaCliente, setBusquedaCliente] = useState('');
@@ -404,6 +407,9 @@ export default function PanelDueno() {
     setMostrandoFormServicio(false);
     setNuevoProblema('');
     setNuevoPrecio('');
+    setServicioEditandoId(null);
+    setEditProblema('');
+    setEditPrecio('');
   };
 
   const cancelarFormServicio = () => {
@@ -470,14 +476,9 @@ export default function PanelDueno() {
       // 3. Lógica de WhatsApp (Solo si cambió a TERMINADO)
       if (nuevoEstado === 'TERMINADO') {
         const cliente = biciSeleccionada?.usuario;
+        const servicioActual = serviciosBici.find((s) => s.id === servicioId);
+        const preciofinal = Number(servicioActual?.precio) || 0;
 
-        // CORRECCIÓN 1: Asegurar que existan servicios antes de buscar el último
-        const servicios = biciSeleccionada?.servicios || [];
-        const ultimoservicio = servicios[servicios.length - 1];
-        
-        // CORRECCIÓN 2: Si no encuentra el servicio, dejamos un valor por defecto (0)
-        const preciofinal = ultimoservicio?.precio || 0;
-        
         // Verifico que el cliente exista y tenga cargado un teléfono
         if (cliente && cliente.telefono) {
           const confirmarWsp = window.confirm('El estado se actualizó a TERMINADO. ¿Querés avisarle al cliente por WhatsApp?');
@@ -485,10 +486,6 @@ export default function PanelDueno() {
           if (confirmarWsp) {
             // Limpio el número por si en el registro le pusieron espacios o guiones
             const numeroLimpio = String(cliente.telefono).replace(/\D/g, '');
-            
-            // Agregá esto antes de la línea del 'const mensaje'
-            console.log("Servicios encontrados:", servicios);
-            console.log("Último servicio:", ultimoservicio);
 
             // Armo el mensaje automático
             const mensaje = `¡Hola ${cliente.nombre}! Te avisamos desde PROYECTO bike que tu bicicleta ${biciSeleccionada.marca} ya está lista para retirar. El costo de este servicio es de $${preciofinal}.\n Si preferís abonar por transferencia, podés hacerlo a nuestro alias: davidleandri.x\n Una vez realizada, si podés, enviame el comprobante por acá. ¡Te esperamos!`;
@@ -519,6 +516,63 @@ export default function PanelDueno() {
       );
     } catch (error) {
       alert('No se pudo actualizar el trabajo realizado');
+      console.error(error);
+    }
+  };
+
+  const eliminarServicio = async (servicioId) => {
+    const confirmar = window.confirm('¿Estás seguro de que querés eliminar este servicio? Esta acción no se puede deshacer.');
+    if (!confirmar) return;
+
+    try {
+      await api.delete(`/servicios/${servicioId}`);
+      setServiciosBici((prev) => prev.filter((s) => s.id !== servicioId));
+      if (servicioEditandoId === servicioId) {
+        setServicioEditandoId(null);
+        setEditProblema('');
+        setEditPrecio('');
+      }
+    } catch (error) {
+      alert('No se pudo eliminar el servicio');
+      console.error(error);
+    }
+  };
+
+  const abrirEditarServicio = (servicio) => {
+    setServicioEditandoId(servicio.id);
+    setEditProblema(servicio.problema_informado || '');
+    setEditPrecio(servicio.precio ?? '');
+  };
+
+  const cancelarEditarServicio = () => {
+    setServicioEditandoId(null);
+    setEditProblema('');
+    setEditPrecio('');
+  };
+
+  const guardarEditarServicio = async (servicioId) => {
+    const problema = editProblema.trim();
+    if (!problema) {
+      alert('El problema informado no puede estar vacío');
+      return;
+    }
+
+    try {
+      const payload = {
+        problema_informado: problema,
+        precio: Number(editPrecio),
+      };
+      await api.patch(`/servicios/${servicioId}`, payload);
+      setServiciosBici((prev) =>
+        prev.map((s) =>
+          s.id === servicioId
+            ? { ...s, problema_informado: payload.problema_informado, precio: payload.precio }
+            : s
+        )
+      );
+      cancelarEditarServicio();
+    } catch (error) {
+      alert('No se pudo actualizar el servicio');
       console.error(error);
     }
   };
@@ -848,13 +902,33 @@ export default function PanelDueno() {
                               <th style={{ minWidth: '18rem' }}>Trabajo Realizado</th>
                               <th style={{ minWidth: '12rem' }}>Estado</th>
                               <th style={{ minWidth: '7rem' }}>Precio</th>
+                              <th style={{ minWidth: '10rem' }}>Acciones</th>
                             </tr>
                           </thead>
                           <tbody>
-                            {serviciosBici.map((servicio) => (
+                            {serviciosBici.map((servicio) => {
+                              const editando = servicioEditandoId === servicio.id;
+                              return (
                               <tr key={servicio.id}>
                                 <td>{new Date(servicio.fecha_ingreso).toLocaleDateString() || '-'}</td>
-                                <td>{servicio.problema_informado || '-'}</td>
+                                <td>
+                                  {editando ? (
+                                    <textarea
+                                      className="form-control form-control-sm shadow-none"
+                                      rows={2}
+                                      value={editProblema}
+                                      onChange={(e) => setEditProblema(e.target.value)}
+                                      style={{
+                                        resize: 'vertical',
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px dashed rgba(255,255,255,0.3)',
+                                        color: '#fff',
+                                      }}
+                                    />
+                                  ) : (
+                                    servicio.problema_informado || '-'
+                                  )}
+                                </td>
                                 
                                 {/* ACÁ ESTÁ ARREGLADO EL TEXTAREA INVISIBLE */}
                                 <td style={{ minWidth: '18rem' }}>
@@ -899,9 +973,66 @@ export default function PanelDueno() {
                                     ))}
                                   </select>
                                 </td>
-                                <td>{servicio.precio ? `$${servicio.precio}` : '-'}</td>
+                                <td>
+                                  {editando ? (
+                                    <input
+                                      type="number"
+                                      className="form-control form-control-sm"
+                                      min="0"
+                                      step="0.01"
+                                      value={editPrecio}
+                                      onChange={(e) => setEditPrecio(e.target.value)}
+                                      style={{
+                                        backgroundColor: 'rgba(255,255,255,0.05)',
+                                        border: '1px dashed rgba(255,255,255,0.3)',
+                                        color: '#fff',
+                                      }}
+                                    />
+                                  ) : (
+                                    servicio.precio ? `$${servicio.precio}` : '-'
+                                  )}
+                                </td>
+                                <td>
+                                  <div className="d-flex flex-wrap gap-1">
+                                    {editando ? (
+                                      <>
+                                        <button
+                                          type="button"
+                                          className="btn btn-primary btn-sm"
+                                          onClick={() => guardarEditarServicio(servicio.id)}
+                                        >
+                                          Guardar
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-light btn-sm"
+                                          onClick={cancelarEditarServicio}
+                                        >
+                                          Cancelar
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <>
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-warning btn-sm"
+                                          onClick={() => abrirEditarServicio(servicio)}
+                                        >
+                                          Editar
+                                        </button>
+                                        <button
+                                          type="button"
+                                          className="btn btn-outline-danger btn-sm"
+                                          onClick={() => eliminarServicio(servicio.id)}
+                                        >
+                                          Eliminar
+                                        </button>
+                                      </>
+                                    )}
+                                  </div>
+                                </td>
                               </tr>
-                            ))}
+                            );})}
                           </tbody>
                         </table>
                       </div>
