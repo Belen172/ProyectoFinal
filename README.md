@@ -25,6 +25,6 @@ Un sistema integral de gestión para talleres de bicicletas, diseñado para opti
 
 ### Backend
 * **NestJS:** Arquitectura robusta y escalable para la API REST.
-* **Base de Datos:** (Agregá acá qué base usaste, por ejemplo PostgreSQL o MySQL).
+* **Base de Datos:** MySQL
 
 ---
