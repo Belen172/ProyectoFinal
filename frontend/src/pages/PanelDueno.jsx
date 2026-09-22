@@ -1477,8 +1477,7 @@ export default function PanelDueno() {
                                     !nuevoCliNombre.trim() ||
                                     !nuevoCliApellido.trim() ||
                                     !nuevoCliDni.trim() ||
-                                    !nuevoCliTelefono.trim() ||
-                                    !nuevoCliEmail.trim()
+                                    !nuevoCliTelefono.trim()
                                   }
                                 >
                                   {guardandoCliente ? 'Guardando...' : 'Guardar Cliente'}
