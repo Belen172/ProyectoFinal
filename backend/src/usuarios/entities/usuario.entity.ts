@@ -27,8 +27,8 @@ export class Usuario {
   @Column({ type: 'varchar', length: 20, nullable: true })
   telefono!: string;
 
-  @Column({ type: 'varchar', length: 100, unique: true })
-  email!: string;
+  @Column({ type: 'varchar', length: 100, unique: true, nullable: true })
+  email?: string; 
 
   @Column({ type: 'varchar', length: 255 })
   password!: string;
@@ -40,5 +40,5 @@ export class Usuario {
   fecha_registro!: Date;
 
   @OneToMany(() => Bicicleta, (bicicleta) => bicicleta.usuario)
-  bicicletas: Bicicleta[];
+  bicicletas!: Bicicleta[];
 }

@@ -23,8 +23,8 @@ export class CreateUsuarioDto {
   telefono?: string;
 
   @IsEmail({}, { message: 'El formato del email no es válido' })
-  @IsNotEmpty({ message: 'El email es obligatorio' })
-  email!: string;
+  @IsOptional() // Permitimos que esté vacío u omitido
+  email?: string; 
 
   @IsString()
   @MinLength(6, { message: 'La contraseña debe tener al menos 6 caracteres' })
