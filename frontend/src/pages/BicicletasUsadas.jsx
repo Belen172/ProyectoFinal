@@ -484,7 +484,11 @@ export default function BicicletasUsadas() {
                   >
                     {bici.imagenUrl && (
                       <img
-                        src={`${API_URL}${bici.imagenUrl}`}
+                      src={
+                        bici.imagenUrl.startsWith('https://')
+                          ? bici.imagenUrl
+                          : `${API_URL}${bici.imagenUrl}`
+                      }
                         className="card-img-top"
                         alt={bici.modelo}
                         style={{
