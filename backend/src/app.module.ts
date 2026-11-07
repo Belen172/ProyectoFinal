@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BicicletasModule } from './bicicletas/bicicletas.module';
+import { BicicletasUsadasModule } from './bicicletas-usadas/bicicletas-usadas.module';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { ServiciosModule } from './servicios/servicios.module';
 import { AuthModule } from './auth/auth.module';
@@ -57,6 +58,7 @@ import { PassportModule } from '@nestjs/passport';
       },
     }),
   BicicletasModule,
+  BicicletasUsadasModule,
   UsuariosModule,
   ServiciosModule,
   AuthModule,
