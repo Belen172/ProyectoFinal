@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Controller,
   Get,
   Post,
@@ -12,8 +13,8 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
+import { memoryStorage } from 'multer';
+import { put, del } from '@vercel/blob';
 import { BicicletasUsadasService } from './bicicletas-usadas.service';
 import { CreateBicicletaUsadaDto } from './dto/create-bicicleta-usada.dto';
 import { UpdateBicicletaUsadaDto } from './dto/update-bicicleta-usada.dto';
@@ -29,29 +30,73 @@ export class BicicletasUsadasController {
   @UseGuards(AdminGuard)
   @UseInterceptors(
     FileInterceptor('imagen', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          const uniqueSuffix =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
+      storage: memoryStorage(),
 
-          callback(
-            null,
-            'bici-' + uniqueSuffix + extname(file.originalname),
+      // Máximo 4 MB por imagen.
+      limits: {
+        fileSize: 4 * 1024 * 1024,
+      },
+
+      fileFilter: (req, file, callback) => {
+        const tiposPermitidos = ['image/jpeg', 'image/png'];
+
+        if (!tiposPermitidos.includes(file.mimetype)) {
+          return callback(
+            new BadRequestException(
+              'La imagen debe ser un archivo JPG o PNG.',
+            ),
+            false,
           );
-        },
-      }),
+        }
+
+        callback(null, true);
+      },
     }),
   )
-  create(
+  async create(
     @Body() createDto: CreateBicicletaUsadaDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
-    if (file) {
-      createDto.imagenUrl = `/uploads/${file.filename}`;
-    }
+    // La URL la genera el servidor al subir la imagen.
+    delete createDto.imagenUrl;
 
-    return this.bicicletasUsadasService.create(createDto);
+    let imagenSubidaUrl: string | undefined;
+
+    try {
+      if (file) {
+        const extension =
+          file.mimetype === 'image/png' ? 'png' : 'jpg';
+
+        const blob = await put(
+          `bicicletas/bici.${extension}`,
+          file.buffer,
+          {
+            access: 'public',
+            addRandomSuffix: true,
+            contentType: file.mimetype,
+          },
+        );
+
+        imagenSubidaUrl = blob.url;
+        createDto.imagenUrl = blob.url;
+      }
+
+      return await this.bicicletasUsadasService.create(createDto);
+    } catch (error) {
+      // Si falla el guardado, intentamos quitar la foto recién subida.
+      if (imagenSubidaUrl) {
+        try {
+          await del(imagenSubidaUrl);
+        } catch (cleanupError) {
+          console.error(
+            'No se pudo eliminar la imagen de una publicación fallida:',
+            cleanupError,
+          );
+        }
+      }
+
+      throw error;
+    }
   }
 
   @Get()
@@ -70,6 +115,9 @@ export class BicicletasUsadasController {
     @Param('id', ParseIntPipe) id: number,
     @Body() updateDto: UpdateBicicletaUsadaDto,
   ) {
+    // La edición de los datos conserva la foto actual.
+    delete updateDto.imagenUrl;
+
     return this.bicicletasUsadasService.update(id, updateDto);
   }
 
