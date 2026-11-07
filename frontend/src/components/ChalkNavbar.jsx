@@ -14,15 +14,25 @@ export default function ChalkNavbar() {
         </Link>
       </div>
       <div className="chalk-navbar-spacer" aria-hidden="true" />
-      <div className="chalk-navbar-consulta-wrap">
+      <div className="chalk-navbar-consulta-wrap" style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+        
         {/* Se muestra SOLO si estamos en la Home (ruta raíz '/') */}
         {location.pathname === '/' && (
-          <Link
-            to="/cliente"
-            className="chalk-consulta-link chalk-consulta-header-nav"
-          >
-            CONSULTÁ EL ESTADO DE TU BICICLETA
-          </Link>
+          <>
+            <Link
+              to="/usadas"
+              className="chalk-consulta-link chalk-consulta-header-nav"
+            >
+              BICICLETAS USADAS
+            </Link>
+
+            <Link
+              to="/cliente"
+              className="chalk-consulta-link chalk-consulta-header-nav"
+            >
+              CONSULTÁ EL ESTADO DE TU BICICLETA
+            </Link>
+          </>
         )}
       </div>
     </nav>

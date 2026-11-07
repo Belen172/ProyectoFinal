@@ -9,5 +9,6 @@ import foto8 from './imagenes-home/foto8.jpeg';
 import foto9 from './imagenes-home/foto9.jpeg';
 import foto10 from './imagenes-home/foto10.jpeg';
 import foto11 from './imagenes-home/foto11.jpeg';
+import foto0 from './imagenes-home/foto0.jpeg';
 
-export const fotosTaller = [ foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8, foto9, foto10, foto11];
+export const fotosTaller = [ foto0, foto1, foto2, foto3, foto4, foto5, foto6, foto7, foto8, foto9, foto10, foto11];

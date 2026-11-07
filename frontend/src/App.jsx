@@ -4,10 +4,11 @@ import Login from './pages/Login';
 import PanelDueno from './pages/PanelDueno';
 import PanelCliente from './pages/PanelCliente';
 import ProtectedRoute from './components/ProtectedRoute';
+import BicicletasUsadas from './pages/BicicletasUsadas';
 
 function AppContent() {
   const location = useLocation();
-  const rutasChalkboard = ['/', '/cliente', '/login', '/dueno'];
+  const rutasChalkboard = ['/', '/cliente', '/login', '/dueno', '/usadas'];
   const usaLayoutChalkboard = rutasChalkboard.includes(location.pathname);
 
   return (
@@ -67,6 +68,7 @@ function AppContent() {
             }
           />
           <Route path="/cliente" element={<PanelCliente />} />
+          <Route path="/usadas" element={<BicicletasUsadas />} />
         </Routes>
       </div>
     </>
