@@ -224,8 +224,9 @@ export default function BicicletasUsadas() {
           }}
         >
           {/* Cabecera */}
-          <div className="d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
+          <div className="usadas-page-header d-flex justify-content-between align-items-center mb-4 pb-2 border-bottom border-secondary">
             <h2
+              className="usadas-page-title"
               style={{
                 fontFamily: "'Oswald', sans-serif",
                 fontWeight: 700,

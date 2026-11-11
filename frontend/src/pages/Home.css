@@ -434,6 +434,23 @@
   .chalk-col-right {
     min-height: 0;
   }
+
+  .chalk-col-title,
+  .usadas-page-title {
+    text-align: center;
+  }
+
+  .usadas-page-header.d-flex {
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    gap: 0.85rem;
+  }
+
+  .usadas-page-title {
+    width: 100%;
+  }
 }
 
 /* Columnas */
